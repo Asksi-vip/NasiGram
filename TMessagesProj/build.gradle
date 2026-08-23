@@ -113,11 +113,11 @@ android {
             buildConfigField("String","BUILD_VERSION_STRING","\"${TG_APP_VERSION_NAME}\"")
             buildConfigField("boolean", "DEBUG_PRIVATE_VERSION", "false")
 
-            buildConfigField("int","API_ID", "${localProperties.get("apiId", 0)}")
-            buildConfigField("String","API_HASH", "\"${localProperties.get("apiHash")}\"")
-            buildConfigField("String","SENTRY_DSN", "\"${localProperties.get("sentryDsn")}\"")
-            buildConfigField("long","HELPER_BOT_ID", "${localProperties.get("helperBotId", 0)}")
-            buildConfigField("String","HELPER_BOT_USERNAME", "\"${localProperties.get("helperBotUsername")}\"")
+            buildConfigField("int","API_ID", "${localProperties.getProperty("apiId", "4")}")
+            buildConfigField("String","API_HASH", "\"${localProperties.getProperty("apiHash", "014b35b6184100b085b0d0572f9b5103")}\"")
+            buildConfigField("String","SENTRY_DSN", "\"${localProperties.getProperty("sentryDsn", "")}\"")
+            buildConfigField("long","HELPER_BOT_ID", "${localProperties.getProperty("helperBotId", "0")}")
+            buildConfigField("String","HELPER_BOT_USERNAME", "\"${localProperties.getProperty("helperBotUsername", "")}\"")
         }
 
         release {
@@ -127,11 +127,11 @@ android {
             buildConfigField("String","BUILD_VERSION_STRING","\"${TG_APP_VERSION_NAME}\"")
             buildConfigField("boolean", "DEBUG_PRIVATE_VERSION", "false")
 
-            buildConfigField("int","API_ID", "${localProperties.get("apiId", 0)}")
-            buildConfigField("String","API_HASH", "\"${localProperties.get("apiHash")}\"")
-            buildConfigField("String","SENTRY_DSN", "\"${localProperties.get("sentryDsn")}\"")
-            buildConfigField("long","HELPER_BOT_ID", "${localProperties.get("helperBotId", 0)}")
-            buildConfigField("String","HELPER_BOT_USERNAME", "\"${localProperties.get("helperBotUsername")}\"")
+            buildConfigField("int","API_ID", "${localProperties.getProperty("apiId", "4")}")
+            buildConfigField("String","API_HASH", "\"${localProperties.getProperty("apiHash", "014b35b6184100b085b0d0572f9b5103")}\"")
+            buildConfigField("String","SENTRY_DSN", "\"${localProperties.getProperty("sentryDsn", "")}\"")
+            buildConfigField("long","HELPER_BOT_ID", "${localProperties.getProperty("helperBotId", "0")}")
+            buildConfigField("String","HELPER_BOT_USERNAME", "\"${localProperties.getProperty("helperBotUsername", "")}\"")
         }
     }
     namespace 'org.telegram.messenger'
