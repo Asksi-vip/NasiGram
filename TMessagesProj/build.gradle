@@ -113,8 +113,8 @@ android {
             buildConfigField("String","BUILD_VERSION_STRING","\"${TG_APP_VERSION_NAME}\"")
             buildConfigField("boolean", "DEBUG_PRIVATE_VERSION", "false")
 
-            buildConfigField("int","API_ID", "${localProperties.getProperty("apiId", "4")}")
-            buildConfigField("String","API_HASH", "\"${localProperties.getProperty("apiHash", "014b35b6184100b085b0d0572f9b5103")}\"")
+            buildConfigField("int","API_ID", "${localProperties.getProperty("apiId", "23818207")}")
+            buildConfigField("String","API_HASH", "\"${localProperties.getProperty("apiHash", "7529def36ea9e8b62f95d54c060561cc")}\"")
             buildConfigField("String","SENTRY_DSN", "\"${localProperties.getProperty("sentryDsn", "")}\"")
             buildConfigField("long","HELPER_BOT_ID", "${localProperties.getProperty("helperBotId", "0")}")
             buildConfigField("String","HELPER_BOT_USERNAME", "\"${localProperties.getProperty("helperBotUsername", "")}\"")
@@ -127,8 +127,8 @@ android {
             buildConfigField("String","BUILD_VERSION_STRING","\"${TG_APP_VERSION_NAME}\"")
             buildConfigField("boolean", "DEBUG_PRIVATE_VERSION", "false")
 
-            buildConfigField("int","API_ID", "${localProperties.getProperty("apiId", "4")}")
-            buildConfigField("String","API_HASH", "\"${localProperties.getProperty("apiHash", "014b35b6184100b085b0d0572f9b5103")}\"")
+            buildConfigField("int","API_ID", "${localProperties.getProperty("apiId", "23818207")}")
+            buildConfigField("String","API_HASH", "\"${localProperties.getProperty("apiHash", "7529def36ea9e8b62f95d54c060561cc")}\"")
             buildConfigField("String","SENTRY_DSN", "\"${localProperties.getProperty("sentryDsn", "")}\"")
             buildConfigField("long","HELPER_BOT_ID", "${localProperties.getProperty("helperBotId", "0")}")
             buildConfigField("String","HELPER_BOT_USERNAME", "\"${localProperties.getProperty("helperBotUsername", "")}\"")
