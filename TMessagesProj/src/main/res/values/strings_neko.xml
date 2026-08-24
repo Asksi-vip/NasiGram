@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="AppNameNeko" translatable="false">@string/Nekogram</string>
-    <string name="Nekogram" translatable="false">Nekogram</string>
-    <string name="NekogramBeta" translatable="false">Nekogram Beta</string>
+    <string name="AppNameNeko" translatable="false">NasiGram</string>
+    <string name="Nekogram" translatable="false">NasiGram</string>
+    <string name="NekogramBeta" translatable="false">NasiGram</string>
     <string name="NekoSettings">Neko Settings</string>
     <string name="PreferIPv6">Prefer connecting through IPv6</string>
     <string name="MessageMenu">Message menu</string>
@@ -119,7 +119,7 @@
     <string name="RegistrationDateNewer">Newer than %s</string>
     <string name="RegistrationDateOlder">Older than %s</string>
     <string name="RegistrationDateApproximately">Approximately %s</string>
-    <string name="UpdateNekogram">Update Nekogram</string>
+    <string name="UpdateNekogram">Update NasiGram</string>
     <string name="TranslationTarget">Target language</string>
     <string name="TranslationTargetApp">Follow app</string>
     <string name="Translator">Translator</string>
@@ -145,9 +145,9 @@
     <string name="OfficialSite">Official site</string>
     <string name="MutualContact">Mutual contact</string>
     <string name="MutualContactDescription">This contact is a mutual contact.</string>
-    <string name="InviteTextNeko">Hey, I\'m using Nekogram to chat. Join me! Download it here: %1$s</string>
-    <string name="ShareNekogram">Share Nekogram...</string>
-    <string name="NekogramVersion">Nekogram %1$s\nBased on Telegram %2$s\nDesigned by %3$s</string>
+    <string name="InviteTextNeko">Hey, I\'m using NasiGram to chat. Join me! Download it here: %1$s</string>
+    <string name="ShareNekogram">Share NasiGram...</string>
+    <string name="NekogramVersion">NasiGram %1$s\nBased on Telegram %2$s\nDesigned by %3$s</string>
     <string name="UpdateInstalling">Installing update...</string>
     <string name="UpdateInstallingNotification">A notification will be shown when the update completes.</string>
     <string name="UpdateInstallingRelaunch">The app will relaunch when the update completes.</string>
