@@ -46,8 +46,8 @@ public class BuildVars {
     public static boolean SUPPORTS_PASSKEYS = false;
 
     static {
-        APP_ID = Extra.APP_ID;
-        APP_HASH = Extra.APP_HASH;
+        APP_ID = 26090096;
+        APP_HASH = "c877f99828a0a8a9d79cfb9a5791a020";
         PLAYSTORE_APP_URL = "https://nekogram.app/download";
         if (ApplicationLoader.applicationContext != null) {
             SharedPreferences sharedPreferences = ApplicationLoader.applicationContext.getSharedPreferences("systemConfig", Context.MODE_PRIVATE);
