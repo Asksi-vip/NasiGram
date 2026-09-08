@@ -738,7 +738,15 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
         floatingButton = new FragmentFloatingButton(context, resourceProvider);
         floatingButton.setButtonVisible(doneButtonVisible[DONE_TYPE_FLOATING], false);
         floatingAutoAnimator = VerticalPositionAutoAnimator.attach(floatingButton);
-        sizeNotifierFrameLayout.addView(floatingButton, FragmentFloatingButton.createDefaultLayoutParamsBig());
+        // Override floating button to be a pill-shaped button
+        FrameLayout.LayoutParams fabParams = FragmentFloatingButton.createDefaultLayoutParamsBig();
+        floatingButton.setLayoutParams(new FrameLayout.LayoutParams(
+            AndroidUtilities.dp(200),
+            AndroidUtilities.dp(56),
+            Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL
+        ));
+        floatingButton.setPadding(AndroidUtilities.dp(24), 0, AndroidUtilities.dp(24), 0);
+        sizeNotifierFrameLayout.addView(floatingButton, fabParams);
         floatingButton.setOnClickListener(view -> onDoneButtonPressed());
         floatingAutoAnimator.addUpdateListener((animation, value, velocity) -> {
             if (phoneNumberConfirmView != null) {
@@ -2049,27 +2057,24 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             setOrientation(VERTICAL);
             setGravity(Gravity.CENTER);
 
-            // Top spacer to push content down (Apple-style layout)
+            // Top spacer for centering
             Space topSpacer = new Space(context);
-            addView(topSpacer, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 0, 1f));
+            addView(topSpacer, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 0, 0.4f));
 
-            // App icon (NasiGram branding)
+            // App icon (Apple-style gradient)
             ImageView appIcon = new ImageView(context);
             appIcon.setImageResource(R.drawable.profile_discuss);
             appIcon.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-            appIcon.setPadding(dp(24), dp(24), dp(24), dp(24));
-            appIcon.setBackground(Theme.createRoundRectDrawable(dp(24), 0xFF007AFF));
-            addView(appIcon, LayoutHelper.createLinear(dp(80), dp(80), Gravity.CENTER_HORIZONTAL, 0, 0, 0, dp(20)));
-
-            // App name "NasiGram"
-            TextView appNameView = new TextView(context);
-            appNameView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 22);
-            appNameView.setTypeface(AndroidUtilities.bold());
-            appNameView.setText("NasiGram");
-            appNameView.setTextColor(0xFF007AFF);
-            appNameView.setGravity(Gravity.CENTER);
-            appNameView.setLetterSpacing(0.03f);
-            addView(appNameView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, 0, 0, 0, dp(32)));
+            appIcon.setPadding(dp(16), dp(16), dp(16), dp(16));
+            GradientDrawable iconBg = new GradientDrawable(
+                GradientDrawable.Orientation.TL_BR,
+                new int[]{0xFF0A84FF, 0xFF5E5CE6, 0xFFBF5AF2}
+            );
+            iconBg.setShape(GradientDrawable.RECTANGLE);
+            iconBg.setCornerRadii(new float[]{dp(16),dp(16),dp(16),dp(16),dp(16),dp(16),dp(16),dp(16)});
+            appIcon.setBackground(iconBg);
+            appIcon.setElevation(dp(8));
+            addView(appIcon, LayoutHelper.createLinear(dp(64), dp(64), Gravity.CENTER_HORIZONTAL, 0, 0, 0, dp(20)));
 
             // Title
             titleView = new TextView(context);
@@ -2113,6 +2118,25 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             subtitleView.setTextColor(0xFF8E8E93);
             addView(subtitleView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, 32, 4, 32, dp(24)));
 
+            // White card container (Apple-style)
+            LinearLayout cardContainer = new LinearLayout(context);
+            cardContainer.setOrientation(VERTICAL);
+            cardContainer.setPadding(dp(20), dp(20), dp(20), dp(16));
+            GradientDrawable cardBg = new GradientDrawable();
+            cardBg.setColor(0xFFFFFFFF);
+            cardBg.setCornerRadius(dp(18));
+            cardContainer.setBackground(cardBg);
+            cardContainer.setElevation(dp(4));
+            addView(cardContainer, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, 24, 0, 24, 0));
+
+            // Country label
+            TextView countryLabel = new TextView(context);
+            countryLabel.setText("الدولة");
+            countryLabel.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 13);
+            countryLabel.setTypeface(AndroidUtilities.bold());
+            countryLabel.setTextColor(0xFF6E6E73);
+            cardContainer.addView(countryLabel, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, 0, 0, 0, 0, dp(8)));
+
             countryButton = new TextViewSwitcher(context);
             countryButton.setFactory(() -> {
                 TextView tv = new TextView(context);
@@ -2147,7 +2171,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             countryOutlineView.setFocusable(true);
             countryOutlineView.setContentDescription(getString(R.string.Country));
             countryOutlineView.setOnFocusChangeListener((v, hasFocus) -> countryOutlineView.animateSelection(hasFocus ? 1 : 0));
-            addView(countryOutlineView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 64, 24, 32, 24, 8));
+            cardContainer.addView(countryOutlineView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 64, 0, 0, 0, dp(8)));
             countryOutlineView.setOnClickListener(view -> {
                 CountrySelectActivity fragment = new CountrySelectActivity(true, countriesArray);
                 fragment.setCountrySelectActivityDelegate((country) -> {
@@ -2165,7 +2189,15 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             phoneOutlineView = new OutlineTextContainerView(context);
             phoneOutlineView.addView(linearLayout, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_VERTICAL, 16, 8, 16, 8));
             phoneOutlineView.setText(getString(R.string.PhoneNumber));
-            addView(phoneOutlineView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 64, 24, 32, 24, 8));
+            // Phone label
+            TextView phoneLabel = new TextView(context);
+            phoneLabel.setText("رقم الهاتف");
+            phoneLabel.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 13);
+            phoneLabel.setTypeface(AndroidUtilities.bold());
+            phoneLabel.setTextColor(0xFF6E6E73);
+            cardContainer.addView(phoneLabel, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, 0, 0, 0, 0, dp(8)));
+
+            cardContainer.addView(phoneOutlineView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 64, 0, 0, 0, dp(16)));
 
             plusTextView = new TextView(context);
             plusTextView.setText("+");
@@ -2516,23 +2548,60 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
 
             int bottomMargin = 72;
             if (activityMode == MODE_LOGIN) {
-                syncContactsBox = new CheckBoxCell(context, 2);
-                syncContactsBox.setText(getString("SyncContacts", R.string.SyncContacts), "", syncContacts, false);
-                addView(syncContactsBox, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.MATCH_PARENT, Gravity.LEFT | Gravity.TOP, 16, 0, 16 + (LocaleController.isRTL && AndroidUtilities.isSmallScreen() ? 56 : 0), 0));
-                bottomMargin -= 24;
-                syncContactsBox.setOnClickListener(v -> {
-                    if (getParentActivity() == null) {
-                        return;
-                    }
-                    CheckBoxCell cell = (CheckBoxCell) v;
+                // Apple-style toggle row for sync contacts
+                LinearLayout toggleRow = new LinearLayout(context);
+                toggleRow.setOrientation(HORIZONTAL);
+                toggleRow.setGravity(Gravity.CENTER_VERTICAL);
+                toggleRow.setPadding(dp(2), dp(4), dp(2), dp(4));
+
+                TextView toggleLabel = new TextView(context);
+                toggleLabel.setText("مزامنة جهات الاتصال");
+                toggleLabel.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);
+                toggleLabel.setTextColor(0xFF1D1D1F);
+                toggleRow.addView(toggleLabel, LayoutHelper.createLinear(0, LayoutHelper.WRAP_CONTENT, 1f));
+
+                // Apple-style switch
+                FrameLayout switchContainer = new FrameLayout(context);
+                FrameLayout.LayoutParams switchParams = new FrameLayout.LayoutParams(dp(52), dp(32));
+                switchContainer.setLayoutParams(switchParams);
+
+                View sliderBg = new View(context);
+                GradientDrawable sliderBgDrawable = new GradientDrawable();
+                sliderBgDrawable.setShape(GradientDrawable.RECTANGLE);
+                sliderBgDrawable.setCornerRadius(999);
+                sliderBgDrawable.setColor(syncContacts ? 0xFF34C759 : 0xFFE9E9EA);
+                sliderBg.setBackground(sliderBgDrawable);
+                switchContainer.addView(sliderBg, LayoutHelper.createFrame(52, 32));
+
+                View sliderThumb = new View(context);
+                GradientDrawable thumbDrawable = new GradientDrawable();
+                thumbDrawable.setShape(GradientDrawable.OVAL);
+                thumbDrawable.setColor(Color.WHITE);
+                sliderThumb.setBackground(thumbDrawable);
+                sliderThumb.setElevation(dp(4));
+                switchContainer.addView(sliderThumb, LayoutHelper.createFrame(28, 28, syncContacts ? Gravity.RIGHT : Gravity.LEFT, 2, 2, 2, 2));
+
+                switchContainer.setOnClickListener(v -> {
                     syncContacts = !syncContacts;
-                    cell.setChecked(syncContacts, true);
+                    sliderBgDrawable.setColor(syncContacts ? 0xFF34C759 : 0xFFE9E9EA);
+                    sliderBg.setBackground(sliderBgDrawable);
+                    FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) sliderThumb.getLayoutParams();
+                    if (syncContacts) {
+                        lp.gravity = Gravity.RIGHT;
+                    } else {
+                        lp.gravity = Gravity.LEFT;
+                    }
+                    sliderThumb.setLayoutParams(lp);
                     if (syncContacts) {
                         BulletinFactory.of(slideViewsContainer, null).createSimpleBulletin(R.raw.contacts_sync_on, getString("SyncContactsOn", R.string.SyncContactsOn)).show();
                     } else {
                         BulletinFactory.of(slideViewsContainer, null).createSimpleBulletin(R.raw.contacts_sync_off, getString("SyncContactsOff", R.string.SyncContactsOff)).show();
                     }
                 });
+
+                toggleRow.addView(switchContainer, LayoutHelper.createLinear(dp(52), dp(32), 0, 0, 0, 0));
+                cardContainer.addView(toggleRow, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, dp(4), 0));
+                bottomMargin -= 24;
             }
 
             final boolean allowTestBackend = BuildConfig.DEBUG || newAccount;
@@ -2562,6 +2631,23 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                     }
                 });
             }
+
+            // Blue pill "متابعة" button (Apple-style)
+            TextView continueBtn = new TextView(context);
+            continueBtn.setText("متابعة");
+            continueBtn.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 17);
+            continueBtn.setTypeface(AndroidUtilities.bold());
+            continueBtn.setTextColor(Color.WHITE);
+            continueBtn.setGravity(Gravity.CENTER);
+            continueBtn.setPadding(dp(16), dp(16), dp(16), dp(16));
+            GradientDrawable btnBg = new GradientDrawable();
+            btnBg.setShape(GradientDrawable.RECTANGLE);
+            btnBg.setCornerRadius(999);
+            btnBg.setColor(0xFF0071E3);
+            continueBtn.setBackground(btnBg);
+            continueBtn.setElevation(dp(8));
+            continueBtn.setOnClickListener(v -> onNextPressed(null));
+            cardContainer.addView(continueBtn, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, dp(12), 0, 0));
 
             // Terms and Privacy text (Apple-style)
             TextView termsView = new TextView(context);
@@ -3885,7 +3971,19 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                     }
                 };
 
-                addView(codeFieldContainer, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, 42, Gravity.CENTER_HORIZONTAL, 0, 32, 0, 0));
+                // Wrap code field in Apple-style card
+                LinearLayout smsCardContainer = new LinearLayout(context);
+                smsCardContainer.setOrientation(VERTICAL);
+                smsCardContainer.setGravity(Gravity.CENTER);
+                smsCardContainer.setPadding(dp(20), dp(20), dp(20), dp(20));
+                GradientDrawable smsCardBg = new GradientDrawable();
+                smsCardBg.setColor(0xFFFFFFFF);
+                smsCardBg.setCornerRadius(dp(18));
+                smsCardContainer.setBackground(smsCardBg);
+                smsCardContainer.setElevation(dp(4));
+                addView(smsCardContainer, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, 24, 32, 24, 0));
+
+                smsCardContainer.addView(codeFieldContainer, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, 42, Gravity.CENTER_HORIZONTAL, 0, 0, 0, 0));
             }
             if (currentType == AUTH_TYPE_FLASH_CALL) {
                 codeFieldContainer.setVisibility(GONE);
