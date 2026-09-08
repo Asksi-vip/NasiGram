@@ -702,9 +702,9 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
         items.add(SettingCell.Factory.of(9, IconBackgroundColors.ORANGE_DEEP.top, IconBackgroundColors.ORANGE_DEEP.bottom, R.drawable.settings_power, getString(R.string.SettingsPowerSaving), getString(R.string.SettingsPowerSavingInfo)));
         items.add(SettingCell.Factory.of(10, IconBackgroundColors.PURPLE.top, IconBackgroundColors.PURPLE.bottom, R.drawable.settings_language, getString(R.string.SettingsLanguage), LocaleController.getCurrentLanguageName()));
 
-        items.add(UItem.asShadow(null));
-
         items.add(SettingCell.Factory.of(50, 0xFFD1E4FF, 0xFF9EC5FF, R.drawable.filled_profile_settings, getString(R.string.NekoSettings)));
+
+        items.add(UItem.asShadow(null));
 
         items.add(UItem.asShadow(null));
 
@@ -889,7 +889,7 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
                 break;
             }
             case 50: {
-                presentSettingFragment(new NekoSettingsActivity());
+                presentSettingFragment(new UserInfoActivity());
                 break;
             }
         }
