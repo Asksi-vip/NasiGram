@@ -92,6 +92,21 @@ dependencies {
 }
 
 android {
+    signingConfigs {
+        debug {
+            storeFile file(project.rootProject.file('keystore/nasigram.p12'))
+            storePassword 'nasigram2026'
+            keyAlias 'nasigram'
+            keyPassword 'nasigram2026'
+        }
+        release {
+            storeFile file(project.rootProject.file('keystore/nasigram.p12'))
+            storePassword 'nasigram2026'
+            keyAlias 'nasigram'
+            keyPassword 'nasigram2026'
+        }
+    }
+
     sourceSets.main.jniLibs.srcDirs = ['./jni/']
 
     externalNativeBuild {
@@ -107,6 +122,7 @@ android {
 
     buildTypes {
         debug {
+            signingConfig signingConfigs.debug
             buildConfigField("long", "VERSION_CODE", "${APP_VERSION_CODE}")
             buildConfigField("String","VERSION_NAME","\"${APP_VERSION_NAME}\"")
             buildConfigField("long", "BUILD_VERSION", "${TG_APP_VERSION_CODE}")
@@ -121,6 +137,7 @@ android {
         }
 
         release {
+            signingConfig signingConfigs.release
             buildConfigField("long", "VERSION_CODE", "${APP_VERSION_CODE}")
             buildConfigField("String","VERSION_NAME","\"${APP_VERSION_NAME}\"")
             buildConfigField("long", "BUILD_VERSION", "${TG_APP_VERSION_CODE}")
