@@ -2583,7 +2583,24 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             try {
                 TelephonyManager telephonyManager = (TelephonyManager) ApplicationLoader.applicationContext.getSystemService(Context.TELEPHONY_SERVICE);
                 if (telephonyManager != null) {
-                    country = null;//telephonyManager.getSimCountryIso().toUpperCase();
+                    try {
+                        String simCountry = telephonyManager.getSimCountryIso();
+                        if (simCountry != null && simCountry.length() == 2) {
+                            country = simCountry.toUpperCase();
+                        }
+                    } catch (Exception e2) {
+                        FileLog.e(e2);
+                    }
+                    if (country == null) {
+                        try {
+                            String networkCountry = telephonyManager.getNetworkCountryIso();
+                            if (networkCountry != null && networkCountry.length() == 2) {
+                                country = networkCountry.toUpperCase();
+                            }
+                        } catch (Exception e2) {
+                            FileLog.e(e2);
+                        }
+                    }
                 }
             } catch (Exception e) {
                 FileLog.e(e);
