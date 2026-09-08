@@ -44,6 +44,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.Uri;
@@ -3013,7 +3014,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             if (name != null && countriesArray != null) {
                 CountrySelectActivity.Country countryWithCode = null;
                 for (int i = 0; i < countriesArray.size(); i++) {
-                    if (countriesArray.get(i) != null && countriesArray.get(i).shortname != null && countriesArray.get(i).shortname.equalsIgnoreCase(country)) {
+                    if (countriesArray.get(i) != null && countriesArray.get(i).name.equals(country)) {
                         countryWithCode = countriesArray.get(i);
                         break;
                     }
