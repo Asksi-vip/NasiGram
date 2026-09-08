@@ -3013,7 +3013,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             if (name != null && countriesArray != null) {
                 CountrySelectActivity.Country countryWithCode = null;
                 for (int i = 0; i < countriesArray.size(); i++) {
-                    if (countriesArray.get(i) != null && countriesArray.get(i).name.equals(country)) {
+                    if (countriesArray.get(i) != null && countriesArray.get(i).shortname != null && countriesArray.get(i).shortname.equalsIgnoreCase(country)) {
                         countryWithCode = countriesArray.get(i);
                         break;
                     }
