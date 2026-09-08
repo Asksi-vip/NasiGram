@@ -737,7 +737,6 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
 
         floatingButton = new FragmentFloatingButton(context, resourceProvider);
         floatingButton.setButtonVisible(doneButtonVisible[DONE_TYPE_FLOATING], false);
-        floatingButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFF007AFF));
         floatingAutoAnimator = VerticalPositionAutoAnimator.attach(floatingButton);
         sizeNotifierFrameLayout.addView(floatingButton, FragmentFloatingButton.createDefaultLayoutParamsBig());
         floatingButton.setOnClickListener(view -> onDoneButtonPressed());
@@ -2050,6 +2049,29 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             setOrientation(VERTICAL);
             setGravity(Gravity.CENTER);
 
+            // Top spacer to push content down (Apple-style layout)
+            Space topSpacer = new Space(context);
+            addView(topSpacer, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 0, 1f));
+
+            // App icon (NasiGram branding)
+            ImageView appIcon = new ImageView(context);
+            appIcon.setImageResource(R.drawable.profile_discuss);
+            appIcon.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+            appIcon.setPadding(dp(24), dp(24), dp(24), dp(24));
+            appIcon.setBackground(Theme.createRoundRectDrawable(dp(24), 0xFF007AFF));
+            addView(appIcon, LayoutHelper.createLinear(dp(80), dp(80), Gravity.CENTER_HORIZONTAL, 0, 0, 0, dp(20)));
+
+            // App name "NasiGram"
+            TextView appNameView = new TextView(context);
+            appNameView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 22);
+            appNameView.setTypeface(AndroidUtilities.bold());
+            appNameView.setText("NasiGram");
+            appNameView.setTextColor(0xFF007AFF);
+            appNameView.setGravity(Gravity.CENTER);
+            appNameView.setLetterSpacing(0.03f);
+            addView(appNameView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, 0, 0, 0, dp(32)));
+
+            // Title
             titleView = new TextView(context);
             titleView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 28);
             titleView.setTypeface(AndroidUtilities.bold());
@@ -2057,7 +2079,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             titleView.setGravity(Gravity.CENTER);
             titleView.setLineSpacing(dp(4), 1.0f);
             titleView.setLetterSpacing(0.02f);
-            addView(titleView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, 32, dp(48), 32, 0));
+            addView(titleView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, 32, 0, 32, 0));
             titleView.setOnClickListener(v -> {
                 if (lastTitleToast != null) {
                     lastTitleToast.cancel();
@@ -2081,13 +2103,15 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             });
 
             subtitleView = new LinkSpanDrawable.LinksTextView(context);
-            subtitleView.setText(getString(activityMode == MODE_CHANGE_PHONE_NUMBER ? R.string.ChangePhoneHelp : R.string.StartText));
-            subtitleView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
+            subtitleView.setText(activityMode == MODE_CHANGE_PHONE_NUMBER 
+                ? getString(R.string.ChangePhoneHelp) 
+                : "Enter your phone number to get started");
+            subtitleView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);
             subtitleView.setGravity(Gravity.CENTER);
             subtitleView.setLineSpacing(dp(4), 1.0f);
             subtitleView.setLetterSpacing(0.01f);
-            subtitleView.setPadding(dp(8), dp(8), dp(8), dp(24));
-            addView(subtitleView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, 32, 8, 32, 0));
+            subtitleView.setTextColor(0xFF8E8E93);
+            addView(subtitleView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, 32, 4, 32, dp(24)));
 
             countryButton = new TextViewSwitcher(context);
             countryButton.setFactory(() -> {
@@ -2123,7 +2147,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             countryOutlineView.setFocusable(true);
             countryOutlineView.setContentDescription(getString(R.string.Country));
             countryOutlineView.setOnFocusChangeListener((v, hasFocus) -> countryOutlineView.animateSelection(hasFocus ? 1 : 0));
-            addView(countryOutlineView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 64, 16, 24, 16, 12));
+            addView(countryOutlineView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 64, 24, 32, 24, 8));
             countryOutlineView.setOnClickListener(view -> {
                 CountrySelectActivity fragment = new CountrySelectActivity(true, countriesArray);
                 fragment.setCountrySelectActivityDelegate((country) -> {
@@ -2141,7 +2165,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             phoneOutlineView = new OutlineTextContainerView(context);
             phoneOutlineView.addView(linearLayout, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_VERTICAL, 16, 8, 16, 8));
             phoneOutlineView.setText(getString(R.string.PhoneNumber));
-            addView(phoneOutlineView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 64, 16, 8, 16, 8));
+            addView(phoneOutlineView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 64, 24, 32, 24, 8));
 
             plusTextView = new TextView(context);
             plusTextView.setText("+");
@@ -2538,6 +2562,16 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                     }
                 });
             }
+
+            // Terms and Privacy text (Apple-style)
+            TextView termsView = new TextView(context);
+            termsView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12);
+            termsView.setGravity(Gravity.CENTER);
+            termsView.setLineSpacing(dp(2), 1.0f);
+            termsView.setPadding(dp(32), dp(16), dp(32), dp(8));
+            termsView.setTextColor(0xFF8E8E93);
+            termsView.setText("By continuing, you agree to our\nTerms of Service and Privacy Policy");
+            addView(termsView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL));
 
             if (bottomMargin > 0 && !AndroidUtilities.isSmallScreen()) {
                 Space bottomSpacer = new Space(context);
