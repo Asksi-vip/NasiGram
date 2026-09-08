@@ -2060,7 +2060,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
 
             // Top spacer for centering
             Space topSpacer = new Space(context);
-            addView(topSpacer, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 0, 0.4f));
+            addView(topSpacer, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 0, 0.3f));
 
             // App icon (Apple-style gradient)
             ImageView appIcon = new ImageView(context);
@@ -2074,7 +2074,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             iconBg.setShape(GradientDrawable.RECTANGLE);
             iconBg.setCornerRadii(new float[]{dp(16),dp(16),dp(16),dp(16),dp(16),dp(16),dp(16),dp(16)});
             appIcon.setBackground(iconBg);
-            appIcon.setElevation(dp(8));
+            appIcon.setElevation(dp(12));
             addView(appIcon, LayoutHelper.createLinear(dp(64), dp(64), Gravity.CENTER_HORIZONTAL, 0, 0, 0, dp(20)));
 
             // Title
@@ -2116,18 +2116,18 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             subtitleView.setGravity(Gravity.CENTER);
             subtitleView.setLineSpacing(dp(4), 1.0f);
             subtitleView.setLetterSpacing(0.01f);
-            subtitleView.setTextColor(0xFF8E8E93);
+            subtitleView.setTextColor(0xFF86868B);
             addView(subtitleView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, 32, 4, 32, dp(24)));
 
             // White card container (Apple-style)
             LinearLayout cardContainer = new LinearLayout(context);
             cardContainer.setOrientation(VERTICAL);
-            cardContainer.setPadding(dp(20), dp(20), dp(20), dp(16));
+            cardContainer.setPadding(dp(20), dp(20), dp(20), dp(20));
             GradientDrawable cardBg = new GradientDrawable();
             cardBg.setColor(0xFFFFFFFF);
             cardBg.setCornerRadius(dp(18));
             cardContainer.setBackground(cardBg);
-            cardContainer.setElevation(dp(4));
+            cardContainer.setElevation(dp(6));
             addView(cardContainer, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, 24, 0, 24, 0));
 
             // Country label
@@ -2579,8 +2579,8 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                 thumbDrawable.setShape(GradientDrawable.OVAL);
                 thumbDrawable.setColor(Color.WHITE);
                 sliderThumb.setBackground(thumbDrawable);
-                sliderThumb.setElevation(dp(4));
-                switchContainer.addView(sliderThumb, LayoutHelper.createFrame(28, 28, syncContacts ? Gravity.RIGHT : Gravity.LEFT, 2, 2, 2, 2));
+                sliderThumb.setElevation(dp(3));
+                switchContainer.addView(sliderThumb, LayoutHelper.createFrame(26, 26, syncContacts ? Gravity.RIGHT : Gravity.LEFT, 3, 3, 3, 3));
 
                 switchContainer.setOnClickListener(v -> {
                     syncContacts = !syncContacts;
@@ -2640,23 +2640,23 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             continueBtn.setTypeface(AndroidUtilities.bold());
             continueBtn.setTextColor(Color.WHITE);
             continueBtn.setGravity(Gravity.CENTER);
-            continueBtn.setPadding(dp(16), dp(16), dp(16), dp(16));
+            continueBtn.setPadding(dp(16), dp(14), dp(16), dp(14));
             GradientDrawable btnBg = new GradientDrawable();
             btnBg.setShape(GradientDrawable.RECTANGLE);
             btnBg.setCornerRadius(999);
             btnBg.setColor(0xFF0071E3);
             continueBtn.setBackground(btnBg);
-            continueBtn.setElevation(dp(8));
+            continueBtn.setElevation(dp(10));
             continueBtn.setOnClickListener(v -> onNextPressed(null));
             cardContainer.addView(continueBtn, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, dp(12), 0, 0));
 
             // Terms and Privacy text (Apple-style)
             TextView termsView = new TextView(context);
-            termsView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12);
+            termsView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 11);
             termsView.setGravity(Gravity.CENTER);
             termsView.setLineSpacing(dp(2), 1.0f);
             termsView.setPadding(dp(32), dp(16), dp(32), dp(8));
-            termsView.setTextColor(0xFF8E8E93);
+            termsView.setTextColor(0xFFAEAEB2);
             termsView.setText("By continuing, you agree to our\nTerms of Service and Privacy Policy");
             addView(termsView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL));
 
@@ -3841,11 +3841,11 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             setOrientation(VERTICAL);
 
             confirmTextView = new TextView(context);
-            confirmTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
+            confirmTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);
             confirmTextView.setLineSpacing(AndroidUtilities.dp(2), 1.0f);
 
             titleTextView = new TextView(context);
-            titleTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 24);
+            titleTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 26);
             titleTextView.setTypeface(AndroidUtilities.bold());
             titleTextView.setGravity(LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT);
             titleTextView.setLineSpacing(AndroidUtilities.dp(4), 1.0f);
@@ -3976,12 +3976,12 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                 LinearLayout smsCardContainer = new LinearLayout(context);
                 smsCardContainer.setOrientation(VERTICAL);
                 smsCardContainer.setGravity(Gravity.CENTER);
-                smsCardContainer.setPadding(dp(20), dp(20), dp(20), dp(20));
+                smsCardContainer.setPadding(dp(24), dp(24), dp(24), dp(24));
                 GradientDrawable smsCardBg = new GradientDrawable();
                 smsCardBg.setColor(0xFFFFFFFF);
                 smsCardBg.setCornerRadius(dp(18));
                 smsCardContainer.setBackground(smsCardBg);
-                smsCardContainer.setElevation(dp(4));
+                smsCardContainer.setElevation(dp(6));
                 addView(smsCardContainer, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, 24, 32, 24, 0));
 
                 smsCardContainer.addView(codeFieldContainer, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, 42, Gravity.CENTER_HORIZONTAL, 0, 0, 0, 0));
