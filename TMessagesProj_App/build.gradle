@@ -86,7 +86,7 @@ android {
     splits.abi {
         var buildingBundle = gradle.startParameter.taskNames.any { it.startsWith("bundle") }
         enable !buildingBundle
-        universalApk true
+        universalApk !project.hasProperty("abiList")
 
         reset()
         if (project.hasProperty("abiList")) {
