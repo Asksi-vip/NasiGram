@@ -276,13 +276,21 @@ public class ApplicationLoader extends Application {
             FileLog.d("app initied");
         }
 
-        MediaController.getInstance();
-        for (int a = 0; a < UserConfig.MAX_ACCOUNT_COUNT; a++) { //TODO improve account
-            if (!UserConfig.getInstance(a).isClientActivated()) continue;
-            ContactsController.getInstance(a).checkAppAccount();
-            DownloadController.getInstance(a);
-        }
-        BillingController.getInstance().startConnection();
+        // Defer heavy non-critical initialization to background thread
+        // to speed up app startup and reduce main thread blocking
+        new Thread(() -> {
+            try {
+                MediaController.getInstance();
+                for (int a = 0; a < UserConfig.MAX_ACCOUNT_COUNT; a++) {
+                    if (!UserConfig.getInstance(a).isClientActivated()) continue;
+                    ContactsController.getInstance(a).checkAppAccount();
+                    DownloadController.getInstance(a);
+                }
+                BillingController.getInstance().startConnection();
+            } catch (Exception e) {
+                FileLog.e(e);
+            }
+        }, "DeferredInit").start();
     }
 
     public ApplicationLoader() {
