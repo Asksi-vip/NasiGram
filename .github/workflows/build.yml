@@ -14,7 +14,7 @@ jobs:
     env:
       GRADLE_OPTS: "-Xmx6g -XX:+UseParallelGC"
     permissions:
-      contents: read
+      contents: write
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -37,8 +37,24 @@ jobs:
       - name: Fast Build ARM64 APK with Gradle
         run: ./gradlew assembleDebug -PabiList=arm64-v8a --parallel --build-cache --stacktrace
 
-      - name: Upload APK Artifact
-        uses: actions/upload-artifact@v4
+      - name: Find APK file
+        id: find-apk
+        run: |
+          APK=$(find TMessagesProj_App/build/outputs/apk -name "*.apk" | head -1)
+          if [ -z "$APK" ]; then
+            echo "ERROR: No APK found"
+            exit 1
+          fi
+          echo "apk_path=$APK" >> "$GITHUB_OUTPUT"
+          echo "Found APK: $APK"
+
+      - name: Upload APK as Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: NasiGram-APK
-          path: TMessagesProj_App/build/outputs/apk/**/*.apk
+          tag_name: build-${{ github.run_number }}
+          name: Build ${{ github.run_number }}
+          files: ${{ steps.find-apk.outputs.apk_path }}
+          prerelease: true
+          generate_release_notes: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
