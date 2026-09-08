@@ -737,6 +737,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
 
         floatingButton = new FragmentFloatingButton(context, resourceProvider);
         floatingButton.setButtonVisible(doneButtonVisible[DONE_TYPE_FLOATING], false);
+        floatingButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFF007AFF));
         floatingAutoAnimator = VerticalPositionAutoAnimator.attach(floatingButton);
         sizeNotifierFrameLayout.addView(floatingButton, FragmentFloatingButton.createDefaultLayoutParamsBig());
         floatingButton.setOnClickListener(view -> onDoneButtonPressed());
@@ -2050,12 +2051,13 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             setGravity(Gravity.CENTER);
 
             titleView = new TextView(context);
-            titleView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
+            titleView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 28);
             titleView.setTypeface(AndroidUtilities.bold());
             titleView.setText(getString(activityMode == MODE_CHANGE_PHONE_NUMBER ? R.string.ChangePhoneNewNumber : R.string.YourNumber));
             titleView.setGravity(Gravity.CENTER);
-            titleView.setLineSpacing(dp(2), 1.0f);
-            addView(titleView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, 32, 0, 32, 0));
+            titleView.setLineSpacing(dp(4), 1.0f);
+            titleView.setLetterSpacing(0.02f);
+            addView(titleView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, 32, dp(48), 32, 0));
             titleView.setOnClickListener(v -> {
                 if (lastTitleToast != null) {
                     lastTitleToast.cancel();
@@ -2080,16 +2082,18 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
 
             subtitleView = new LinkSpanDrawable.LinksTextView(context);
             subtitleView.setText(getString(activityMode == MODE_CHANGE_PHONE_NUMBER ? R.string.ChangePhoneHelp : R.string.StartText));
-            subtitleView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
+            subtitleView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
             subtitleView.setGravity(Gravity.CENTER);
-            subtitleView.setLineSpacing(dp(2), 1.0f);
+            subtitleView.setLineSpacing(dp(4), 1.0f);
+            subtitleView.setLetterSpacing(0.01f);
+            subtitleView.setPadding(dp(8), dp(8), dp(8), dp(24));
             addView(subtitleView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, 32, 8, 32, 0));
 
             countryButton = new TextViewSwitcher(context);
             countryButton.setFactory(() -> {
                 TextView tv = new TextView(context);
-                tv.setPadding(dp(16), dp(12), dp(16), dp(12));
-                tv.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
+                tv.setPadding(dp(16), dp(14), dp(16), dp(14));
+                tv.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 17);
                 tv.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
                 tv.setHintTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteHintText));
                 tv.setMaxLines(1);
@@ -2119,7 +2123,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             countryOutlineView.setFocusable(true);
             countryOutlineView.setContentDescription(getString(R.string.Country));
             countryOutlineView.setOnFocusChangeListener((v, hasFocus) -> countryOutlineView.animateSelection(hasFocus ? 1 : 0));
-            addView(countryOutlineView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 58, 16, 24, 16, 14));
+            addView(countryOutlineView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 64, 16, 24, 16, 12));
             countryOutlineView.setOnClickListener(view -> {
                 CountrySelectActivity fragment = new CountrySelectActivity(true, countriesArray);
                 fragment.setCountrySelectActivityDelegate((country) -> {
@@ -2137,11 +2141,12 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             phoneOutlineView = new OutlineTextContainerView(context);
             phoneOutlineView.addView(linearLayout, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_VERTICAL, 16, 8, 16, 8));
             phoneOutlineView.setText(getString(R.string.PhoneNumber));
-            addView(phoneOutlineView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 58, 16, 8, 16, 8));
+            addView(phoneOutlineView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 64, 16, 8, 16, 8));
 
             plusTextView = new TextView(context);
             plusTextView.setText("+");
-            plusTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
+            plusTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
+            plusTextView.setTypeface(AndroidUtilities.bold());
             plusTextView.setFocusable(false);
             linearLayout.addView(plusTextView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT));
 
@@ -2159,8 +2164,8 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             codeField.setInputType(InputType.TYPE_CLASS_PHONE);
             codeField.setCursorSize(AndroidUtilities.dp(20));
             codeField.setCursorWidth(1.5f);
-            codeField.setPadding(AndroidUtilities.dp(10), 0, 0, 0);
-            codeField.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
+            codeField.setPadding(AndroidUtilities.dp(12), 0, 0, 0);
+            codeField.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 17);
             codeField.setMaxLines(1);
             codeField.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
             codeField.setImeOptions(EditorInfo.IME_ACTION_NEXT | EditorInfo.IME_FLAG_NO_EXTRACT_UI);
@@ -3719,10 +3724,11 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             confirmTextView.setLineSpacing(AndroidUtilities.dp(2), 1.0f);
 
             titleTextView = new TextView(context);
-            titleTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
+            titleTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 24);
             titleTextView.setTypeface(AndroidUtilities.bold());
             titleTextView.setGravity(LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT);
-            titleTextView.setLineSpacing(AndroidUtilities.dp(2), 1.0f);
+            titleTextView.setLineSpacing(AndroidUtilities.dp(4), 1.0f);
+            titleTextView.setLetterSpacing(0.02f);
             titleTextView.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL);
 
             String overrideTitle;
@@ -3808,7 +3814,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                 frameLayout.addView(blueImageView, LayoutHelper.createFrame(64, 64));
 
                 titleTextView.setText(overrideTitle != null ? overrideTitle : getString(R.string.YourCode));
-                innerLinearLayout.addView(titleTextView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, 0, 16, 0, 0));
+                innerLinearLayout.addView(titleTextView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, 0, 24, 0, 0));
                 innerLinearLayout.addView(confirmTextView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, 0, 8, 0, 0));
             } else {
                 confirmTextView.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL);
@@ -7456,7 +7462,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             titleTextView.setLineSpacing(AndroidUtilities.dp(2), 1.0f);
             titleTextView.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL);
             titleTextView.setText(getString(R.string.SetNewPassword));
-            addView(titleTextView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, 8, AndroidUtilities.isSmallScreen() ? 16 : 72, 8, 0));
+            addView(titleTextView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, 8, AndroidUtilities.isSmallScreen() ? 24 : 80, 8, 0));
 
             confirmTextView = new TextView(context);
             confirmTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
@@ -7885,7 +7891,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             imageUpdater.setDelegate(this);
 
             FrameLayout avatarContainer = new FrameLayout(context);
-            addView(avatarContainer, LayoutHelper.createLinear(78, 78, Gravity.CENTER_HORIZONTAL));
+            addView(avatarContainer, LayoutHelper.createLinear(88, 88, Gravity.CENTER_HORIZONTAL));
 
             avatarDrawable = new AvatarDrawable();
 
@@ -8023,11 +8029,11 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
 
             titleTextView = new TextView(context);
             titleTextView.setText(getString(R.string.RegistrationProfileInfo));
-            titleTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
+            titleTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 24);
             titleTextView.setTypeface(AndroidUtilities.bold());
             titleTextView.setLineSpacing(AndroidUtilities.dp(2), 1.0f);
             titleTextView.setGravity(Gravity.CENTER_HORIZONTAL);
-            addView(titleTextView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, 8, 12, 8, 0));
+            addView(titleTextView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, 8, 32, 8, 0));
 
             descriptionTextView = new TextView(context);
             descriptionTextView.setText(getString("RegisterText2", R.string.RegisterText2));
