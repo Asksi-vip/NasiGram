@@ -846,7 +846,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                 setCustomKeyboardVisible(v.hasCustomKeyboard(), false);
 
                 currentDoneType = DONE_TYPE_FLOATING;
-                boolean needFloatingButton = a == VIEW_PHONE_INPUT || a == VIEW_REGISTER ||
+                boolean needFloatingButton = a == VIEW_REGISTER ||
                         a == VIEW_PASSWORD || a == VIEW_NEW_PASSWORD_STAGE_1 || a == VIEW_NEW_PASSWORD_STAGE_2 ||
                         a == VIEW_ADD_EMAIL;
                 showDoneButton(needFloatingButton, false);
@@ -1536,7 +1536,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
     }
 
     public void setPage(@ViewNumber int page, boolean animated, Bundle params, boolean back) {
-        boolean needFloatingButton = page == VIEW_PHONE_INPUT || page == VIEW_REGISTER || page == VIEW_PASSWORD ||
+        boolean needFloatingButton = page == VIEW_REGISTER || page == VIEW_PASSWORD ||
                 page == VIEW_NEW_PASSWORD_STAGE_1 || page == VIEW_NEW_PASSWORD_STAGE_2 || page == VIEW_ADD_EMAIL || page == VIEW_CODE_PHRASE || page == VIEW_CODE_WORD;
         if (page == currentViewNum) {
             animated = false;
@@ -2062,11 +2062,11 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
 
             // Top spacer for centering
             Space topSpacer = new Space(context);
-            addView(topSpacer, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 0, 0.25f));
+            addView(topSpacer, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 0, AndroidUtilities.isSmallScreen() ? 0.02f : 0.08f));
 
             // Title
             titleView = new TextView(context);
-            titleView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, AndroidUtilities.isSmallScreen() ? 24 : 28);
+            titleView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, AndroidUtilities.isSmallScreen() ? 22 : 26);
             titleView.setTypeface(AndroidUtilities.bold());
             titleView.setText(getString(activityMode == MODE_CHANGE_PHONE_NUMBER ? R.string.ChangePhoneNewNumber : R.string.YourNumber));
             titleView.setGravity(Gravity.CENTER);
@@ -2098,19 +2098,19 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             subtitleView = new LinkSpanDrawable.LinksTextView(context);
             subtitleView.setText(activityMode == MODE_CHANGE_PHONE_NUMBER 
                 ? getString(R.string.ChangePhoneHelp) 
-                : "Enter your phone number to get started");
-            subtitleView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, AndroidUtilities.isSmallScreen() ? 14 : 15);
+                : (LocaleController.isRTL ? "أدخل رقم هاتفك للبدء" : "Enter your phone number to get started"));
+            subtitleView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, AndroidUtilities.isSmallScreen() ? 13 : 14);
             subtitleView.setGravity(Gravity.CENTER);
             subtitleView.setLineSpacing(dp(4), 1.0f);
             subtitleView.setLetterSpacing(0.01f);
             subtitleView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText2));
-            addView(subtitleView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, hMargin, 4, hMargin, dp(20)));
+            addView(subtitleView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, hMargin, 4, hMargin, dp(10)));
 
             // Content container (Apple-style card with rounded corners)
             LinearLayout contentContainer = new LinearLayout(context);
             contentContainer.setOrientation(VERTICAL);
             contentContainer.setGravity(Gravity.CENTER_HORIZONTAL);
-            contentContainer.setPadding(dp(18), dp(16), dp(18), dp(16));
+            contentContainer.setPadding(dp(16), dp(12), dp(16), dp(12));
             GradientDrawable cardBg = new GradientDrawable();
             cardBg.setColor(Theme.getColor(Theme.key_dialogBackground));
             cardBg.setCornerRadius(dp(18));
@@ -2119,9 +2119,10 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
 
             // Country label
             TextView countryLabel = new TextView(context);
-            countryLabel.setText("الدولة");
+            countryLabel.setText(LocaleController.isRTL ? "الدولة" : getString(R.string.Country));
             countryLabel.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 13);
             countryLabel.setTypeface(AndroidUtilities.bold());
+            countryLabel.setGravity((LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.CENTER_VERTICAL);
             countryLabel.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText2));
             contentContainer.addView(countryLabel, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, 0, 0, dp(6)));
 
@@ -2159,7 +2160,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             countryOutlineView.setFocusable(true);
             countryOutlineView.setContentDescription(getString(R.string.Country));
             countryOutlineView.setOnFocusChangeListener((v, hasFocus) -> countryOutlineView.animateSelection(hasFocus ? 1 : 0));
-            contentContainer.addView(countryOutlineView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, 0, 0, dp(12)));
+            contentContainer.addView(countryOutlineView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 52, 0, 0, 0, 0, dp(8)));
             countryOutlineView.setOnClickListener(view -> {
                 CountrySelectActivity fragment = new CountrySelectActivity(true, countriesArray);
                 fragment.setCountrySelectActivityDelegate((country) -> {
@@ -2179,13 +2180,14 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             phoneOutlineView.setText(getString(R.string.PhoneNumber));
             // Phone label
             TextView phoneLabel = new TextView(context);
-            phoneLabel.setText("رقم الهاتف");
+            phoneLabel.setText(LocaleController.isRTL ? "رقم الهاتف" : getString(R.string.PhoneNumber));
             phoneLabel.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 13);
             phoneLabel.setTypeface(AndroidUtilities.bold());
+            phoneLabel.setGravity((LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.CENTER_VERTICAL);
             phoneLabel.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText2));
-            contentContainer.addView(phoneLabel, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, 0, 0, dp(6)));
+            contentContainer.addView(phoneLabel, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, 0, 0, dp(4)));
 
-            contentContainer.addView(phoneOutlineView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, 0, 0, dp(14)));
+            contentContainer.addView(phoneOutlineView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 52, 0, 0, 0, 0, dp(8)));
 
             plusTextView = new TextView(context);
             plusTextView.setText("+");
@@ -2543,10 +2545,13 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                 toggleRow.setPadding(dp(2), dp(4), dp(2), dp(4));
 
                 TextView toggleLabel = new TextView(context);
-                toggleLabel.setText("مزامنة جهات الاتصال");
+                toggleLabel.setText(LocaleController.isRTL ? "مزامنة جهات الاتصال" : "Sync Contacts");
                 toggleLabel.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);
+                toggleLabel.setSingleLine(true);
+                toggleLabel.setMaxLines(1);
+                toggleLabel.setEllipsize(TextUtils.TruncateAt.END);
+                toggleLabel.setGravity((LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.CENTER_VERTICAL);
                 toggleLabel.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
-                toggleRow.addView(toggleLabel, LayoutHelper.createLinear(0, LayoutHelper.WRAP_CONTENT, 1f));
 
                 // Apple-style switch
                 FrameLayout switchContainer = new FrameLayout(context);
@@ -2587,8 +2592,15 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                     }
                 });
 
-                toggleRow.addView(switchContainer, LayoutHelper.createLinear(dp(52), dp(32), 0, 0, 0, 0));
-                contentContainer.addView(toggleRow, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, dp(4), 0, 0));
+                if (LocaleController.isRTL) {
+                    toggleRow.addView(switchContainer, LayoutHelper.createLinear(dp(52), dp(32), 0, 0, dp(12), 0));
+                    toggleRow.addView(toggleLabel, LayoutHelper.createLinear(0, LayoutHelper.WRAP_CONTENT, 1f, Gravity.CENTER_VERTICAL));
+                } else {
+                    toggleRow.addView(toggleLabel, LayoutHelper.createLinear(0, LayoutHelper.WRAP_CONTENT, 1f, Gravity.CENTER_VERTICAL));
+                    toggleRow.addView(switchContainer, LayoutHelper.createLinear(dp(52), dp(32), dp(12), 0, 0, 0));
+                }
+
+                contentContainer.addView(toggleRow, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, dp(12), 0, 0));
                 bottomMargin -= 24;
             }
 
@@ -2596,7 +2608,8 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             if (allowTestBackend && activityMode == MODE_LOGIN) {
                 testBackendCheckBox = new CheckBoxCell(context, 2);
                 testBackendCheckBox.setText(getString(R.string.DebugTestBackend), "", testBackend = getConnectionsManager().isTestBackend(), false);
-                addView(testBackendCheckBox, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.MATCH_PARENT, Gravity.LEFT | Gravity.TOP, 16, 0, 16 + (LocaleController.isRTL && AndroidUtilities.isSmallScreen() ? 56 : 0), 0));
+                int gravity = (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.TOP;
+                addView(testBackendCheckBox, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, gravity, hMargin, dp(8), hMargin, dp(4)));
                 bottomMargin -= 24;
                 testBackendCheckBox.setOnClickListener(v -> {
                     if (getParentActivity() == null) {
@@ -2622,12 +2635,12 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
 
             // Blue pill "متابعة" button (Apple-style)
             TextView continueBtn = new TextView(context);
-            continueBtn.setText("متابعة");
-            continueBtn.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 17);
+            continueBtn.setText(LocaleController.isRTL ? "متابعة" : getString(R.string.Continue));
+            continueBtn.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
             continueBtn.setTypeface(AndroidUtilities.bold());
             continueBtn.setTextColor(Color.WHITE);
             continueBtn.setGravity(Gravity.CENTER);
-            continueBtn.setPadding(dp(16), dp(14), dp(16), dp(14));
+            continueBtn.setPadding(dp(16), dp(12), dp(16), dp(12));
             GradientDrawable btnBg = new GradientDrawable();
             btnBg.setShape(GradientDrawable.RECTANGLE);
             btnBg.setCornerRadius(999);
@@ -2635,16 +2648,18 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             continueBtn.setBackground(btnBg);
             continueBtn.setElevation(dp(10));
             continueBtn.setOnClickListener(v -> onNextPressed(null));
-            contentContainer.addView(continueBtn, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, dp(14), 0, 0));
+            contentContainer.addView(continueBtn, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, dp(10), 0, 0));
 
             // Terms and Privacy text (Apple-style)
             TextView termsView = new TextView(context);
             termsView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 11);
             termsView.setGravity(Gravity.CENTER);
             termsView.setLineSpacing(dp(2), 1.0f);
-            termsView.setPadding(hMargin, dp(12), hMargin, dp(4));
+            termsView.setPadding(hMargin, dp(6), hMargin, dp(4));
             termsView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText2));
-            termsView.setText("By continuing, you agree to our\nTerms of Service and Privacy Policy");
+            termsView.setText(LocaleController.isRTL 
+                ? "بالمتابعة، فإنك توافق على\nشروط الخدمة وسياسة الخصوصية" 
+                : "By continuing, you agree to our\nTerms of Service and Privacy Policy");
             addView(termsView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL));
 
             if (bottomMargin > 0 && !AndroidUtilities.isSmallScreen()) {
