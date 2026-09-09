@@ -2551,7 +2551,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                 View sliderThumb = new View(context);
                 GradientDrawable thumbDrawable = new GradientDrawable();
                 thumbDrawable.setShape(GradientDrawable.OVAL);
-                thumbDrawable.setColor(Theme.getColor(Theme.key_switchThumb));
+                thumbDrawable.setColor(Theme.getColor(Theme.key_switchTrackBlueThumb));
                 sliderThumb.setBackground(thumbDrawable);
                 sliderThumb.setElevation(dp(3));
                 switchContainer.addView(sliderThumb, LayoutHelper.createFrame(26, 26, syncContacts ? Gravity.RIGHT : Gravity.LEFT, 3, 3, 3, 3));
