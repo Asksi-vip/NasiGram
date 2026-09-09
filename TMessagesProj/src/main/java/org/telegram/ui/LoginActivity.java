@@ -2159,7 +2159,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             countryOutlineView.setFocusable(true);
             countryOutlineView.setContentDescription(getString(R.string.Country));
             countryOutlineView.setOnFocusChangeListener((v, hasFocus) -> countryOutlineView.animateSelection(hasFocus ? 1 : 0));
-            contentContainer.addView(countryOutlineView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 60, 0, 0, 0, 0, dp(12)));
+            contentContainer.addView(countryOutlineView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, 0, 0, dp(12)));
             countryOutlineView.setOnClickListener(view -> {
                 CountrySelectActivity fragment = new CountrySelectActivity(true, countriesArray);
                 fragment.setCountrySelectActivityDelegate((country) -> {
@@ -2185,7 +2185,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             phoneLabel.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText2));
             contentContainer.addView(phoneLabel, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, 0, 0, dp(6)));
 
-            contentContainer.addView(phoneOutlineView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 60, 0, 0, 0, 0, dp(14)));
+            contentContainer.addView(phoneOutlineView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, 0, 0, dp(14)));
 
             plusTextView = new TextView(context);
             plusTextView.setText("+");
