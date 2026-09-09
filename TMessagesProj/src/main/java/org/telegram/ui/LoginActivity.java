@@ -2060,22 +2060,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
 
             // Top spacer for centering
             Space topSpacer = new Space(context);
-            addView(topSpacer, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 0, 0.3f));
-
-            // App icon (Apple-style gradient)
-            ImageView appIcon = new ImageView(context);
-            appIcon.setImageResource(R.drawable.profile_discuss);
-            appIcon.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-            appIcon.setPadding(dp(16), dp(16), dp(16), dp(16));
-            GradientDrawable iconBg = new GradientDrawable(
-                GradientDrawable.Orientation.TL_BR,
-                new int[]{0xFF0A84FF, 0xFF5E5CE6, 0xFFBF5AF2}
-            );
-            iconBg.setShape(GradientDrawable.RECTANGLE);
-            iconBg.setCornerRadii(new float[]{dp(16),dp(16),dp(16),dp(16),dp(16),dp(16),dp(16),dp(16)});
-            appIcon.setBackground(iconBg);
-            appIcon.setElevation(dp(12));
-            addView(appIcon, LayoutHelper.createLinear(dp(64), dp(64), Gravity.CENTER_HORIZONTAL, 0, 0, 0, dp(20)));
+            addView(topSpacer, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 0, 0.15f));
 
             // Title
             titleView = new TextView(context);
@@ -2116,27 +2101,16 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             subtitleView.setGravity(Gravity.CENTER);
             subtitleView.setLineSpacing(dp(4), 1.0f);
             subtitleView.setLetterSpacing(0.01f);
-            subtitleView.setTextColor(0xFF86868B);
+            subtitleView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText2));
             addView(subtitleView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, 32, 4, 32, dp(24)));
-
-            // White card container (Apple-style)
-            LinearLayout cardContainer = new LinearLayout(context);
-            cardContainer.setOrientation(VERTICAL);
-            cardContainer.setPadding(dp(20), dp(20), dp(20), dp(20));
-            GradientDrawable cardBg = new GradientDrawable();
-            cardBg.setColor(0xFFFFFFFF);
-            cardBg.setCornerRadius(dp(18));
-            cardContainer.setBackground(cardBg);
-            cardContainer.setElevation(dp(6));
-            addView(cardContainer, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, 24, 0, 24, 0));
 
             // Country label
             TextView countryLabel = new TextView(context);
             countryLabel.setText("الدولة");
             countryLabel.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 13);
             countryLabel.setTypeface(AndroidUtilities.bold());
-            countryLabel.setTextColor(0xFF6E6E73);
-            cardContainer.addView(countryLabel, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, 0, 0, 0, 0, dp(8)));
+            countryLabel.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText2));
+            addView(countryLabel, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 24, 0, 24, 0));
 
             countryButton = new TextViewSwitcher(context);
             countryButton.setFactory(() -> {
@@ -2172,7 +2146,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             countryOutlineView.setFocusable(true);
             countryOutlineView.setContentDescription(getString(R.string.Country));
             countryOutlineView.setOnFocusChangeListener((v, hasFocus) -> countryOutlineView.animateSelection(hasFocus ? 1 : 0));
-            cardContainer.addView(countryOutlineView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 64, 0, 0, 0, dp(8)));
+            addView(countryOutlineView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 64, 0, 24, 0, 24, dp(16)));
             countryOutlineView.setOnClickListener(view -> {
                 CountrySelectActivity fragment = new CountrySelectActivity(true, countriesArray);
                 fragment.setCountrySelectActivityDelegate((country) -> {
@@ -2195,10 +2169,10 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             phoneLabel.setText("رقم الهاتف");
             phoneLabel.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 13);
             phoneLabel.setTypeface(AndroidUtilities.bold());
-            phoneLabel.setTextColor(0xFF6E6E73);
-            cardContainer.addView(phoneLabel, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, 0, 0, 0, 0, dp(8)));
+            phoneLabel.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText2));
+            addView(phoneLabel, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 24, 0, 24, 0));
 
-            cardContainer.addView(phoneOutlineView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 64, 0, 0, 0, dp(16)));
+            addView(phoneOutlineView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 64, 0, 24, 0, 24, dp(16)));
 
             plusTextView = new TextView(context);
             plusTextView.setText("+");
@@ -2558,7 +2532,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                 TextView toggleLabel = new TextView(context);
                 toggleLabel.setText("مزامنة جهات الاتصال");
                 toggleLabel.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);
-                toggleLabel.setTextColor(0xFF1D1D1F);
+                toggleLabel.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
                 toggleRow.addView(toggleLabel, LayoutHelper.createLinear(0, LayoutHelper.WRAP_CONTENT, 1f));
 
                 // Apple-style switch
@@ -2570,21 +2544,21 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                 GradientDrawable sliderBgDrawable = new GradientDrawable();
                 sliderBgDrawable.setShape(GradientDrawable.RECTANGLE);
                 sliderBgDrawable.setCornerRadius(999);
-                sliderBgDrawable.setColor(syncContacts ? 0xFF34C759 : 0xFFE9E9EA);
+                sliderBgDrawable.setColor(syncContacts ? Theme.getColor(Theme.key_switchTrackChecked) : Theme.getColor(Theme.key_switchTrack));
                 sliderBg.setBackground(sliderBgDrawable);
                 switchContainer.addView(sliderBg, LayoutHelper.createFrame(52, 32));
 
                 View sliderThumb = new View(context);
                 GradientDrawable thumbDrawable = new GradientDrawable();
                 thumbDrawable.setShape(GradientDrawable.OVAL);
-                thumbDrawable.setColor(Color.WHITE);
+                thumbDrawable.setColor(Theme.getColor(Theme.key_switchThumb));
                 sliderThumb.setBackground(thumbDrawable);
                 sliderThumb.setElevation(dp(3));
                 switchContainer.addView(sliderThumb, LayoutHelper.createFrame(26, 26, syncContacts ? Gravity.RIGHT : Gravity.LEFT, 3, 3, 3, 3));
 
                 switchContainer.setOnClickListener(v -> {
                     syncContacts = !syncContacts;
-                    sliderBgDrawable.setColor(syncContacts ? 0xFF34C759 : 0xFFE9E9EA);
+                    sliderBgDrawable.setColor(syncContacts ? Theme.getColor(Theme.key_switchTrackChecked) : Theme.getColor(Theme.key_switchTrack));
                     sliderBg.setBackground(sliderBgDrawable);
                     FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) sliderThumb.getLayoutParams();
                     if (syncContacts) {
@@ -2601,7 +2575,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                 });
 
                 toggleRow.addView(switchContainer, LayoutHelper.createLinear(dp(52), dp(32), 0, 0, 0, 0));
-                cardContainer.addView(toggleRow, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, dp(4), 0));
+                addView(toggleRow, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 24, 0, 24, 0));
                 bottomMargin -= 24;
             }
 
@@ -2648,7 +2622,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             continueBtn.setBackground(btnBg);
             continueBtn.setElevation(dp(10));
             continueBtn.setOnClickListener(v -> onNextPressed(null));
-            cardContainer.addView(continueBtn, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, dp(12), 0, 0));
+            addView(continueBtn, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 24, dp(20), 24, 0));
 
             // Terms and Privacy text (Apple-style)
             TextView termsView = new TextView(context);
@@ -2656,7 +2630,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             termsView.setGravity(Gravity.CENTER);
             termsView.setLineSpacing(dp(2), 1.0f);
             termsView.setPadding(dp(32), dp(16), dp(32), dp(8));
-            termsView.setTextColor(0xFFAEAEB2);
+            termsView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText2));
             termsView.setText("By continuing, you agree to our\nTerms of Service and Privacy Policy");
             addView(termsView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL));
 
@@ -3972,19 +3946,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                     }
                 };
 
-                // Wrap code field in Apple-style card
-                LinearLayout smsCardContainer = new LinearLayout(context);
-                smsCardContainer.setOrientation(VERTICAL);
-                smsCardContainer.setGravity(Gravity.CENTER);
-                smsCardContainer.setPadding(dp(24), dp(24), dp(24), dp(24));
-                GradientDrawable smsCardBg = new GradientDrawable();
-                smsCardBg.setColor(0xFFFFFFFF);
-                smsCardBg.setCornerRadius(dp(18));
-                smsCardContainer.setBackground(smsCardBg);
-                smsCardContainer.setElevation(dp(6));
-                addView(smsCardContainer, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, 24, 32, 24, 0));
-
-                smsCardContainer.addView(codeFieldContainer, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, 42, Gravity.CENTER_HORIZONTAL, 0, 0, 0, 0));
+                addView(codeFieldContainer, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, 42, Gravity.CENTER_HORIZONTAL, 0, 32, 0, 0));
             }
             if (currentType == AUTH_TYPE_FLASH_CALL) {
                 codeFieldContainer.setVisibility(GONE);
