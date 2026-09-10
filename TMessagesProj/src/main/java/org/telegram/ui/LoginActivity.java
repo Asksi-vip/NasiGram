@@ -2353,8 +2353,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                 return false;
             });
             codeDividerView = new View(context);
-            LayoutParams params = LayoutHelper.createLinear(0, LayoutHelper.MATCH_PARENT, 4, 8, 12, 8);
-            params.width = Math.max(2, AndroidUtilities.dp(0.5f));
+            LayoutParams params = LayoutHelper.createLinear(AndroidUtilities.dp(0.5f), LayoutHelper.MATCH_PARENT, 0, 4, 8, 4, 8);
             linearLayout.addView(codeDividerView, params);
 
             phoneField = new AnimatedPhoneNumberEditText(context) {
@@ -2412,7 +2411,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
 //            phoneField.setLineColors(getThemedColor(Theme.key_windowBackgroundWhiteInputField), getThemedColor(Theme.key_windowBackgroundWhiteInputFieldActivated), getThemedColor(Theme.key_text_RedRegular));
             phoneField.setShowSoftInputOnFocus(!(hasCustomKeyboard() && !isCustomKeyboardForceDisabled()));
             phoneField.setContentDescription(getString(R.string.PhoneNumber));
-            linearLayout.addView(phoneField, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 36));
+            linearLayout.addView(phoneField, LayoutHelper.createLinear(0, 36, 1f));
             phoneField.addTextChangedListener(new TextWatcher() {
 
                 private int characterAction = -1;
@@ -2551,7 +2550,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                 toggleLabel.setMaxLines(1);
                 toggleLabel.setEllipsize(TextUtils.TruncateAt.END);
                 toggleLabel.setGravity((LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.CENTER_VERTICAL);
-                toggleLabel.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
+                toggleLabel.setTextColor(Theme.getColor(Theme.key_dialogTextBlack));
 
                 // Apple-style switch
                 FrameLayout switchContainer = new FrameLayout(context);
