@@ -2060,9 +2060,9 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
 
             final int hMargin = AndroidUtilities.isTablet() ? dp(96) : (AndroidUtilities.isSmallScreen() ? dp(16) : dp(24));
 
-            // Top spacer for centering
+            // Top flexible spacer to absorb vertical height on tall screens
             Space topSpacer = new Space(context);
-            addView(topSpacer, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 0, AndroidUtilities.isSmallScreen() ? 0.02f : 0.08f));
+            addView(topSpacer, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 0, 1f));
 
             // Title
             titleView = new TextView(context);
@@ -2573,6 +2573,8 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                 sliderThumb.setElevation(dp(3));
                 switchContainer.addView(sliderThumb, LayoutHelper.createFrame(26, 26, syncContacts ? Gravity.RIGHT : Gravity.LEFT, 3, 3, 3, 3));
 
+                switchContainer.setFocusable(true);
+                switchContainer.setContentDescription(toggleLabel.getText());
                 switchContainer.setOnClickListener(v -> {
                     syncContacts = !syncContacts;
                     sliderBgDrawable.setColor(syncContacts ? Theme.getColor(Theme.key_switchTrackChecked) : Theme.getColor(Theme.key_switchTrack));
@@ -2603,7 +2605,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                 bottomMargin -= 24;
             }
 
-            final boolean allowTestBackend = BuildConfig.DEBUG || newAccount;
+            final boolean allowTestBackend = BuildVars.DEBUG_VERSION || BuildConfig.DEBUG;
             if (allowTestBackend && activityMode == MODE_LOGIN) {
                 testBackendCheckBox = new CheckBoxCell(context, 2);
                 testBackendCheckBox.setText(getString(R.string.DebugTestBackend), "", testBackend = getConnectionsManager().isTestBackend(), false);
@@ -2661,11 +2663,9 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                 : "By continuing, you agree to our\nTerms of Service and Privacy Policy");
             addView(termsView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL));
 
-            if (bottomMargin > 0 && !AndroidUtilities.isSmallScreen()) {
-                Space bottomSpacer = new Space(context);
-                bottomSpacer.setMinimumHeight(AndroidUtilities.dp(bottomMargin));
-                addView(bottomSpacer, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT));
-            }
+            // Bottom flexible spacer to absorb vertical height on tall screens
+            Space bottomSpacer = new Space(context);
+            addView(bottomSpacer, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 0, 1f));
 
             HashMap<String, String> languageMap = new HashMap<>();
 
