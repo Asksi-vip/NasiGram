@@ -111,8 +111,8 @@ public class OutlineTextContainerView extends FrameLayout {
         invalidate();
     }
 
-    public void setText(@NonNull String text) {
-        this.mText = text;
+    public void setText(String text) {
+        this.mText = text != null ? text : "";
         invalidate();
     }
 
@@ -202,7 +202,7 @@ public class OutlineTextContainerView extends FrameLayout {
         float stroke = outlinePaint.getStrokeWidth();
 
         float scaleX = useCenter ? 0.75f + 0.25f * (1f - titleProgress) : 0.75f;
-        float textWidth = textPaint.measureText(mText) * scaleX;
+        float textWidth = TextUtils.isEmpty(mText) ? 0f : textPaint.measureText(mText) * scaleX;
 
         canvas.save();
         rect.set(getPaddingLeft() + AndroidUtilities.dp(PADDING_LEFT - PADDING_TEXT), getPaddingTop(), getWidth() - AndroidUtilities.dp(PADDING_LEFT + PADDING_TEXT) - getPaddingRight(), getPaddingTop() + stroke * 2);
@@ -221,9 +221,11 @@ public class OutlineTextContainerView extends FrameLayout {
         float fromRight = left + textWidth / 2f + AndroidUtilities.dp(PADDING_TEXT);
         canvas.drawLine(left, lineY, fromRight + (left - fromRight) * (useCenter ? titleProgress : 1f), lineY, outlinePaint);
 
-        canvas.save();
-        canvas.scale(scaleX, scaleX, getPaddingLeft() + AndroidUtilities.dp(PADDING_LEFT + PADDING_TEXT), textY);
-        canvas.drawText(mText, getPaddingLeft() + AndroidUtilities.dp(PADDING_LEFT) + textX, textY, textPaint);
-        canvas.restore();
+        if (!TextUtils.isEmpty(mText)) {
+            canvas.save();
+            canvas.scale(scaleX, scaleX, getPaddingLeft() + AndroidUtilities.dp(PADDING_LEFT + PADDING_TEXT), textY);
+            canvas.drawText(mText, getPaddingLeft() + AndroidUtilities.dp(PADDING_LEFT) + textX, textY, textPaint);
+            canvas.restore();
+        }
     }
 }
