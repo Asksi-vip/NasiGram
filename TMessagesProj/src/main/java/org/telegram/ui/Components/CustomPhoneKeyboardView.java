@@ -8,6 +8,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.text.Editable;
 import android.text.TextPaint;
 import android.view.GestureDetector;
@@ -66,6 +67,9 @@ public class CustomPhoneKeyboardView extends ViewGroup {
 
     public CustomPhoneKeyboardView(Context context) {
         super(context);
+
+        // iOS 26 Liquid Glass: translucent glass keyboard surface
+        setBackground(getKeyboardGlassBackground());
 
         for (int i = 0; i < 11; i++) {
             if (i == 9) continue;
@@ -266,8 +270,17 @@ public class CustomPhoneKeyboardView extends ViewGroup {
             defaultColor, pressedColor, pressedColor);
     }
 
+    private static Drawable getKeyboardGlassBackground() {
+        boolean dark = Theme.isCurrentThemeDark();
+        GradientDrawable body = new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,
+                dark ? new int[]{0xE61B242F, 0xD9141C26} : new int[]{0xCCFFFFFF, 0xA8FFFFFF});
+        body.setShape(GradientDrawable.RECTANGLE);
+        return body;
+    }
+
     public void updateColors() {
         backButton.setColorFilter(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
+        setBackground(getKeyboardGlassBackground());
         for (int a = 0; a < views.length; a++) {
             View v = views[a];
             if (v != null) {

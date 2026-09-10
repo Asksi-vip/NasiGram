@@ -64,6 +64,31 @@ public class OutlineTextContainerView extends FrameLayout {
     private float strokeWidthRegular = Math.max(2, AndroidUtilities.dp(0.5f));
     private float strokeWidthSelected = AndroidUtilities.dp(1.6667f);
 
+    // iOS 26 Liquid Glass additions (backward compatible: defaults keep the original look)
+    private float cornerRadius = AndroidUtilities.dp(8);
+    private int glassFillColor = 0; // 0 = transparent (original behaviour)
+    private final Paint glassFillPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint glowPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private boolean glowEnabled;
+    private int glowColor = 0xFF229AF0;
+
+    public void setCornerRadius(float radiusPx) {
+        this.cornerRadius = radiusPx;
+        invalidate();
+    }
+
+    public void setGlassFill(int color) {
+        this.glassFillColor = color;
+        glassFillPaint.setColor(color);
+        invalidate();
+    }
+
+    public void setFocusGlow(boolean enabled, int color) {
+        this.glowEnabled = enabled;
+        this.glowColor = color;
+        invalidate();
+    }
+
     private EditText attachedEditText;
     private boolean forceUseCenter, forceUseCenter2, forceForceUseCenter;
 
@@ -193,6 +218,14 @@ public class OutlineTextContainerView extends FrameLayout {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
+        if (glassFillColor != 0) {
+            glassFillPaint.setColor(glassFillColor);
+            canvas.drawRoundRect(
+                    getPaddingLeft() + AndroidUtilities.dp(2), getPaddingTop() + AndroidUtilities.dp(2),
+                    getWidth() - AndroidUtilities.dp(2) - getPaddingRight(), getHeight() - AndroidUtilities.dp(2) - getPaddingBottom(),
+                    cornerRadius, cornerRadius, glassFillPaint);
+        }
+
         float textOffset = textPaint.getTextSize() / 2f - AndroidUtilities.dp(1.75f);
         float topY = getPaddingTop() + textOffset;
         float centerY = getHeight() / 2f + textPaint.getTextSize() / 2f;
@@ -204,11 +237,20 @@ public class OutlineTextContainerView extends FrameLayout {
         float scaleX = useCenter ? 0.75f + 0.25f * (1f - titleProgress) : 0.75f;
         float textWidth = TextUtils.isEmpty(mText) ? 0f : textPaint.measureText(mText) * scaleX;
 
+        if (glowEnabled && selectionProgress > 0.01f) {
+            glowPaint.set(outlinePaint);
+            glowPaint.setStyle(Paint.Style.STROKE);
+            glowPaint.setColor(glowColor);
+            glowPaint.setAlpha((int) (56 * selectionProgress));
+            glowPaint.setStrokeWidth(stroke + AndroidUtilities.dp(4.5f) * selectionProgress);
+            canvas.drawRoundRect(getPaddingLeft() + stroke, getPaddingTop() + stroke, getWidth() - stroke - getPaddingRight(), getHeight() - stroke - getPaddingBottom(), cornerRadius, cornerRadius, glowPaint);
+        }
+
         canvas.save();
         rect.set(getPaddingLeft() + AndroidUtilities.dp(PADDING_LEFT - PADDING_TEXT), getPaddingTop(), getWidth() - AndroidUtilities.dp(PADDING_LEFT + PADDING_TEXT) - getPaddingRight(), getPaddingTop() + stroke * 2);
         canvas.clipRect(rect, Region.Op.DIFFERENCE);
         rect.set(getPaddingLeft() + stroke, getPaddingTop() + stroke, getWidth() - stroke - getPaddingRight(), getHeight() - stroke - getPaddingBottom());
-        canvas.drawRoundRect(rect, AndroidUtilities.dp(8), AndroidUtilities.dp(8), outlinePaint);
+        canvas.drawRoundRect(rect, cornerRadius, cornerRadius, outlinePaint);
         canvas.restore();
 
         float left = getPaddingLeft() + AndroidUtilities.dp(PADDING_LEFT - PADDING_TEXT), lineY = getPaddingTop() + stroke,

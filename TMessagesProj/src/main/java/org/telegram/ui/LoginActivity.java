@@ -45,6 +45,8 @@ import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.LayerDrawable;
+import android.graphics.drawable.RippleDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.Uri;
@@ -763,9 +765,10 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             }
         });
         backButtonView.setContentDescription(getString(R.string.AccDescrGoBack));
-        int padding = AndroidUtilities.dp(4);
+        // iOS 26 Liquid Glass: circular glass top button (42dp)
+        int padding = AndroidUtilities.dp(9);
         backButtonView.setPadding(padding, padding, padding, padding);
-        sizeNotifierFrameLayout.addView(backButtonView, LayoutHelper.createFrame(32, 32, Gravity.LEFT | Gravity.TOP, 16, 16, 0, 0));
+        sizeNotifierFrameLayout.addView(backButtonView, LayoutHelper.createFrame(42, 42, Gravity.LEFT | Gravity.TOP, 14, 14, 0, 0));
 
         moreButtonView = new ActionBarMenuItem(context, null, 0, Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
         moreButtonView.setIcon(R.drawable.ic_ab_other);
@@ -781,7 +784,9 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
         moreButtonView.setSubMenuOpenSide(1);
         moreButtonView.setOnClickListener(view -> moreButtonView.toggleSubMenu());
         moreButtonView.setContentDescription(LocaleController.getString(R.string.AccDescrMoreOptions));
-        sizeNotifierFrameLayout.addView(moreButtonView, LayoutHelper.createFrame(32, 32, Gravity.RIGHT | Gravity.TOP, 16, 16, 16, 16));
+        // iOS 26 Liquid Glass: circular glass top button (42dp)
+        moreButtonView.setPadding(AndroidUtilities.dp(5), AndroidUtilities.dp(5), AndroidUtilities.dp(5), AndroidUtilities.dp(5));
+        sizeNotifierFrameLayout.addView(moreButtonView, LayoutHelper.createFrame(42, 42, Gravity.RIGHT | Gravity.TOP, 14, 14, 14, 14));
 
         if (emailChangeSkipCallback != null && !emailChangeNonSkippable && emailChangeIsSuggestion) {
             emailChangeSkipButton = new TextView(context);
@@ -1995,6 +2000,107 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
     private TLRPC.TL_help_termsOfService currentTermsOfService;
 
     public class PhoneView extends SlideView implements AdapterView.OnItemSelectedListener, NotificationCenter.NotificationCenterDelegate {
+        // ===== iOS 26 Liquid Glass — shared helpers (visual only, no logic changes) =====
+        private static int glassScreenWidthDp() {
+            return (int) (AndroidUtilities.displaySize.x / AndroidUtilities.density);
+        }
+
+        private static int glassScreenHeightDp() {
+            return (int) (AndroidUtilities.displaySize.y / AndroidUtilities.density);
+        }
+
+        private static Drawable glassLoginBackground() {
+            boolean dark = Theme.isCurrentThemeDark();
+            float radius = Math.max(AndroidUtilities.displaySize.x, AndroidUtilities.displaySize.y) * 0.62f;
+
+            GradientDrawable base = new GradientDrawable(GradientDrawable.Orientation.TL_BR, dark ?
+                    new int[]{0xFF0A1220, 0xFF0D1626, 0xFF101527, 0xFF140F26} :
+                    new int[]{0xFFEAF4FD, 0xFFDFEEFB, 0xFFE6E9FB, 0xFFF3ECFA});
+
+            GradientDrawable violet = new GradientDrawable();
+            violet.setGradientType(GradientDrawable.RADIAL_GRADIENT);
+            violet.setGradientCenter(0.82f, 0.06f);
+            violet.setGradientRadius(radius);
+            violet.setColors(new int[]{dark ? 0x4D7F5FE8 : 0x577F5FE8, 0x007F5FE8});
+
+            GradientDrawable blue = new GradientDrawable();
+            blue.setGradientType(GradientDrawable.RADIAL_GRADIENT);
+            blue.setGradientCenter(0.12f, 0.18f);
+            blue.setGradientRadius(radius);
+            blue.setColors(new int[]{dark ? 0x57229AF0 : 0x6B229AF0, 0x00229AF0});
+
+            GradientDrawable bottomGlow = new GradientDrawable();
+            bottomGlow.setGradientType(GradientDrawable.RADIAL_GRADIENT);
+            bottomGlow.setGradientCenter(0.5f, 1.04f);
+            bottomGlow.setGradientRadius(radius);
+            bottomGlow.setColors(new int[]{dark ? 0x33229AF0 : 0x6165A9E0, 0x0065A9E0});
+
+            return new LayerDrawable(new Drawable[]{base, violet, blue, bottomGlow});
+        }
+
+        private static Drawable glassCard(float cornerRadiusDp) {
+            boolean dark = Theme.isCurrentThemeDark();
+            float radius = AndroidUtilities.dp(cornerRadiusDp);
+
+            GradientDrawable sheen = new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,
+                    dark ? new int[]{0x29FFFFFF, 0x0DFFFFFF, 0x00FFFFFF} : new int[]{0x80FFFFFF, 0x2EFFFFFF, 0x00FFFFFF});
+            sheen.setShape(GradientDrawable.RECTANGLE);
+            sheen.setCornerRadius(radius);
+
+            GradientDrawable body = new GradientDrawable();
+            body.setShape(GradientDrawable.RECTANGLE);
+            body.setCornerRadius(radius);
+            body.setColor(dark ? 0x13FFFFFF : 0x70FFFFFF);
+            body.setStroke(Math.max(1, AndroidUtilities.dp(0.5f)), dark ? 0x24FFFFFF : 0xB8FFFFFF);
+
+            return new LayerDrawable(new Drawable[]{sheen, body});
+        }
+
+        private static Drawable glassCircle() {
+            boolean dark = Theme.isCurrentThemeDark();
+            GradientDrawable circle = new GradientDrawable();
+            circle.setShape(GradientDrawable.OVAL);
+            circle.setColor(dark ? 0x1AFFFFFF : 0x61FFFFFF);
+            circle.setStroke(Math.max(1, AndroidUtilities.dp(0.5f)), dark ? 0x29FFFFFF : 0xA6FFFFFF);
+            return circle;
+        }
+
+        private static Drawable glassTopButton() {
+            GradientDrawable mask = new GradientDrawable();
+            mask.setShape(GradientDrawable.OVAL);
+            return new RippleDrawable(android.content.res.ColorStateList.valueOf(Theme.getColor(Theme.key_listSelector)), glassCircle(), mask);
+        }
+
+        private static Drawable glassCta(float cornerRadiusDp) {
+            float radius = AndroidUtilities.dp(cornerRadiusDp);
+
+            GradientDrawable body = new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,
+                    new int[]{0xFF3FB2FF, 0xFF1884E0});
+            body.setShape(GradientDrawable.RECTANGLE);
+            body.setCornerRadius(radius);
+            body.setStroke(Math.max(1, AndroidUtilities.dp(0.5f)), 0x8CFFFFFF);
+
+            GradientDrawable sheen = new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,
+                    new int[]{0x66FFFFFF, 0x00FFFFFF});
+            sheen.setShape(GradientDrawable.RECTANGLE);
+            sheen.setCornerRadius(radius);
+
+            return new LayerDrawable(new Drawable[]{body, sheen});
+        }
+
+        private static Drawable glassTrack(boolean checked) {
+            if (checked) {
+                GradientDrawable on = new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, new int[]{0xFF3FB2FF, 0xFF1E8FE8});
+                on.setShape(GradientDrawable.RECTANGLE);
+                on.setCornerRadius(AndroidUtilities.dp(999));
+                return on;
+            }
+            GradientDrawable off = new GradientDrawable();
+            off.setShape(GradientDrawable.RECTANGLE);
+            off.setCornerRadius(AndroidUtilities.dp(999));
+            off.setColor(Theme.isCurrentThemeDark() ? 0x24FFFFFF : 0x290D2A4A);
+            return off;
+        }
         private AnimatedPhoneNumberEditText codeField;
         private AnimatedPhoneNumberEditText phoneField;
         private TextView titleView;
@@ -2058,11 +2164,25 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             setOrientation(VERTICAL);
             setGravity(Gravity.CENTER_HORIZONTAL);
 
-            final int hMargin = AndroidUtilities.isTablet() ? dp(96) : (AndroidUtilities.isSmallScreen() ? dp(16) : dp(24));
+            // iOS 26 Liquid Glass: adaptive background + responsive scale tiers
+            final int screenWdp = glassScreenWidthDp();
+            final int screenHdp = glassScreenHeightDp();
+            final boolean compactHeight = screenHdp < 480; // landscape / short screens
+            // 0 = XS (<360dp), 1 = S (360-400), 2 = M (400-450), 3 = L (450-600), 4 = TABLET (>600)
+            final int tier = screenWdp > 600 ? 4 : screenWdp >= 450 ? 3 : screenWdp >= 400 ? 2 : screenWdp >= 360 ? 1 : 0;
+            final int hMargin = tier == 0 ? 16 : tier == 1 ? 18 : 24;
+            final int titleSizeDp = compactHeight ? 22 : tier == 0 ? 22 : tier == 1 ? 24 : tier == 4 ? 29 : 26;
+            final int fieldHeight = tier == 0 ? 50 : 54;
+            final int cardPadding = tier == 0 ? 14 : 16;
+            final float cardRadius = tier == 0 ? 26f : 30f;
+            final float fieldRadius = tier == 0 ? 18f : 20f;
+            final int ctaHeight = tier == 0 ? 48 : 52;
+            final boolean darkTheme = Theme.isCurrentThemeDark();
+            setBackground(glassLoginBackground());
 
             // Title
             titleView = new TextView(context);
-            titleView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, AndroidUtilities.isSmallScreen() ? 22 : 26);
+            titleView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, titleSizeDp);
             titleView.setTypeface(AndroidUtilities.bold());
             titleView.setText(getString(activityMode == MODE_CHANGE_PHONE_NUMBER ? R.string.ChangePhoneNewNumber : R.string.YourNumber));
             titleView.setGravity(Gravity.CENTER);
@@ -2103,24 +2223,32 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             subtitleView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText2));
             addView(subtitleView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, hMargin, 4, hMargin, dp(16)));
 
-            // Content container (Compact card with rounded corners)
+            // Content container (iOS 26 Liquid Glass card)
             LinearLayout contentContainer = new LinearLayout(context);
             contentContainer.setOrientation(VERTICAL);
             contentContainer.setGravity(Gravity.CENTER_HORIZONTAL);
-            contentContainer.setPadding(dp(16), dp(16), dp(16), dp(16));
-            GradientDrawable cardBg = new GradientDrawable();
-            cardBg.setColor(Theme.getColor(Theme.key_dialogBackground));
-            cardBg.setCornerRadius(dp(16));
-            contentContainer.setBackground(cardBg);
+            contentContainer.setPadding(dp(cardPadding), dp(cardPadding), dp(cardPadding), dp(cardPadding));
+            contentContainer.setBackground(glassCard(cardRadius));
             addView(contentContainer, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, hMargin, 0, hMargin, 0));
+
+            // Cap card width on large screens and center it (responsive max-width)
+            final int cardMaxW = tier == 4 ? 400 : tier == 3 ? 420 : 0;
+            LinearLayout.LayoutParams cardLp = (LinearLayout.LayoutParams) contentContainer.getLayoutParams();
+            if (cardMaxW > 0 && screenWdp - 2 * hMargin > cardMaxW) {
+                int side = AndroidUtilities.dp((screenWdp - cardMaxW) / 2);
+                cardLp.leftMargin = side;
+                cardLp.rightMargin = side;
+                contentContainer.setLayoutParams(cardLp);
+            }
 
             // Country section label
             TextView countryLabel = new TextView(context);
             countryLabel.setText(LocaleController.isRTL ? "الدولة" : getString(R.string.Country));
-            countryLabel.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 13);
+            countryLabel.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12);
             countryLabel.setTypeface(AndroidUtilities.bold());
+            countryLabel.setLetterSpacing(0.06f);
             countryLabel.setGravity((LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.CENTER_VERTICAL);
-            countryLabel.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText2));
+            countryLabel.setTextColor((Theme.getColor(Theme.key_windowBackgroundWhiteGrayText2) & 0x00FFFFFF) | 0x8C000000);
             contentContainer.addView(countryLabel, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, 0, 0, dp(6)));
 
             countryButton = new TextViewSwitcher(context);
@@ -2160,7 +2288,10 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             countryOutlineView.setFocusable(true);
             countryOutlineView.setContentDescription(getString(R.string.Country));
             countryOutlineView.setOnFocusChangeListener((v, hasFocus) -> countryOutlineView.animateSelection(hasFocus ? 1 : 0));
-            contentContainer.addView(countryOutlineView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 52, 0, 0, 0, 0, dp(12)));
+            countryOutlineView.setCornerRadius(AndroidUtilities.dp(fieldRadius));
+            countryOutlineView.setGlassFill(darkTheme ? 0x17FFFFFF : 0x66FFFFFF);
+            countryOutlineView.setFocusGlow(true, darkTheme ? 0xFF48B2FF : 0xFF229AF0);
+            contentContainer.addView(countryOutlineView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, fieldHeight, 0, 0, 0, 0, dp(12)));
             countryOutlineView.setOnClickListener(view -> {
                 CountrySelectActivity fragment = new CountrySelectActivity(true, countriesArray);
                 fragment.setCountrySelectActivityDelegate((country) -> {
@@ -2175,10 +2306,11 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             // Phone section label
             TextView phoneLabel = new TextView(context);
             phoneLabel.setText(LocaleController.isRTL ? "رقم الهاتف" : getString(R.string.PhoneNumber));
-            phoneLabel.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 13);
+            phoneLabel.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12);
             phoneLabel.setTypeface(AndroidUtilities.bold());
+            phoneLabel.setLetterSpacing(0.06f);
             phoneLabel.setGravity((LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.CENTER_VERTICAL);
-            phoneLabel.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText2));
+            phoneLabel.setTextColor((Theme.getColor(Theme.key_windowBackgroundWhiteGrayText2) & 0x00FFFFFF) | 0x8C000000);
             contentContainer.addView(phoneLabel, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, 0, 0, dp(6)));
 
             LinearLayout linearLayout = new LinearLayout(context);
@@ -2188,7 +2320,10 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             phoneOutlineView = new OutlineTextContainerView(context);
             phoneOutlineView.addView(linearLayout, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_VERTICAL, 12, 8, 12, 8));
             phoneOutlineView.setText(null);
-            contentContainer.addView(phoneOutlineView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 52, 0, 0, 0, 0, dp(12)));
+            phoneOutlineView.setCornerRadius(AndroidUtilities.dp(fieldRadius));
+            phoneOutlineView.setGlassFill(darkTheme ? 0x17FFFFFF : 0x66FFFFFF);
+            phoneOutlineView.setFocusGlow(true, darkTheme ? 0xFF48B2FF : 0xFF229AF0);
+            contentContainer.addView(phoneOutlineView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, fieldHeight, 0, 0, 0, 0, dp(12)));
 
             plusTextView = new TextView(context);
             plusTextView.setText("+");
@@ -2560,11 +2695,9 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                 switchContainer.setLayoutParams(switchParams);
 
                 View sliderBg = new View(context);
-                GradientDrawable sliderBgDrawable = new GradientDrawable();
-                sliderBgDrawable.setShape(GradientDrawable.RECTANGLE);
-                sliderBgDrawable.setCornerRadius(999);
-                sliderBgDrawable.setColor(syncContacts ? Theme.getColor(Theme.key_switchTrackChecked) : Theme.getColor(Theme.key_switchTrack));
-                sliderBg.setBackground(sliderBgDrawable);
+                // iOS 26 Liquid Glass switch track
+                Drawable sliderTrack = glassTrack(syncContacts);
+                sliderBg.setBackground(sliderTrack);
                 switchContainer.addView(sliderBg, LayoutHelper.createFrame(52, 32));
 
                 View sliderThumb = new View(context);
@@ -2579,8 +2712,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                 switchContainer.setContentDescription(toggleLabel.getText());
                 switchContainer.setOnClickListener(v -> {
                     syncContacts = !syncContacts;
-                    sliderBgDrawable.setColor(syncContacts ? Theme.getColor(Theme.key_switchTrackChecked) : Theme.getColor(Theme.key_switchTrack));
-                    sliderBg.setBackground(sliderBgDrawable);
+                    sliderBg.setBackground(glassTrack(syncContacts));
                     FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) sliderThumb.getLayoutParams();
                     if (syncContacts) {
                         lp.gravity = Gravity.RIGHT;
@@ -2606,25 +2738,17 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                 contentContainer.addView(toggleRow, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, dp(12), 0, 0));
             }
 
-            // Primary "متابعة" CTA button
+            // Primary "متابعة" CTA button — iOS 26 Liquid Glass pill
             TextView continueBtn = new TextView(context);
             continueBtn.setText(LocaleController.isRTL ? "متابعة" : getString(R.string.Continue));
-            continueBtn.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
+            continueBtn.setTextSize(TypedValue.COMPLEX_UNIT_DIP, tier == 0 ? 15 : 16);
             continueBtn.setTypeface(AndroidUtilities.bold());
-            int accentColor = Theme.getColor(Theme.key_chats_actionBackground);
-            if (accentColor == 0) {
-                accentColor = 0xFF2AABEE;
-            }
             continueBtn.setTextColor(0xFFFFFFFF);
             continueBtn.setGravity(Gravity.CENTER);
             continueBtn.setPadding(dp(16), dp(12), dp(16), dp(12));
-            GradientDrawable btnBg = new GradientDrawable();
-            btnBg.setShape(GradientDrawable.RECTANGLE);
-            btnBg.setCornerRadius(dp(12));
-            btnBg.setColor(accentColor);
-            continueBtn.setBackground(btnBg);
+            continueBtn.setBackground(glassCta(ctaHeight / 2f));
             continueBtn.setOnClickListener(v -> onNextPressed(null));
-            contentContainer.addView(continueBtn, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48, 0, 16, 0, 0));
+            contentContainer.addView(continueBtn, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, ctaHeight, 0, 16, 0, 0));
 
             // Terms and Privacy text
             TextView termsView = new TextView(context);
@@ -8826,9 +8950,9 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
         fragmentView.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundGray));
 
         backButtonView.setColorFilter(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
-        backButtonView.setBackground(Theme.createSelectorDrawable(Theme.getColor(Theme.key_listSelector)));
+        backButtonView.setBackground(PhoneView.glassTopButton());
         moreButtonView.setIconColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
-        moreButtonView.setBackground(Theme.createSelectorDrawable(Theme.getColor(Theme.key_listSelector)));
+        moreButtonView.setBackground(PhoneView.glassTopButton());
 
         proxyDrawable.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText), PorterDuff.Mode.SRC_IN));
         proxyButtonView.setBackground(Theme.createSelectorDrawable(Theme.getColor(Theme.key_listSelector)));
