@@ -384,6 +384,11 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
 
     private PhoneNumberConfirmView phoneNumberConfirmView;
 
+    // NasiGram iOS 26 Liquid Glass: bottom-sheet phone confirmation.
+    // New additive path — the legacy floating PhoneNumberConfirmView above is kept intact.
+    private static final boolean USE_NASIGRAM_CONFIRM_SHEET = true;
+    private NasiGramConfirmSheet nasiGramConfirmSheet;
+
     private static final int DONE_TYPE_FLOATING = 0;
     private static final int DONE_TYPE_ACTION = 1;
 
@@ -2663,6 +2668,10 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             });
             phoneField.setOnEditorActionListener((textView, i, keyEvent) -> {
                 if (i == EditorInfo.IME_ACTION_NEXT) {
+                    if (USE_NASIGRAM_CONFIRM_SHEET && nasiGramConfirmSheet != null) {
+                        nasiGramConfirmSheet.pressConfirm();
+                        return true;
+                    }
                     if (phoneNumberConfirmView != null) {
                         phoneNumberConfirmView.fabButton.callOnClick();
                         return true;
@@ -3143,6 +3152,32 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
 
         }
 
+        private void showNasiGramConfirmSheet(String phoneNumber, String code) {
+            nasiGramConfirmSheet = new NasiGramConfirmSheet(fragmentView.getContext(), (ViewGroup) fragmentView, floatingButton, phoneNumber, new NasiGramConfirmSheet.ICallback() {
+                @Override
+                public void onConfirmPressed(NasiGramConfirmSheet sheet) {
+                    confirmedNumber = true;
+                    currentDoneType = DONE_TYPE_FLOATING;
+                    needShowProgress(0, false);
+                    sheet.animateProgress(() -> {
+                        sheet.dismiss();
+                        AndroidUtilities.runOnUIThread(() -> onNextPressed(code), 150);
+                    });
+                }
+
+                @Override
+                public void onEditPressed(NasiGramConfirmSheet sheet) {
+                    sheet.dismiss();
+                }
+
+                @Override
+                public void onDismiss(NasiGramConfirmSheet sheet) {
+                    nasiGramConfirmSheet = null;
+                }
+            });
+            nasiGramConfirmSheet.show();
+        }
+
         @Override
         public void onNextPressed(String code) {
             if (getParentActivity() == null || nextPressed || isRequestingFirebaseSms) {
@@ -3162,6 +3197,12 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                 if (AndroidUtilities.displaySize.x > AndroidUtilities.displaySize.y && !isCustomKeyboardVisible() && sizeNotifierFrameLayout.measureKeyboardHeight() > AndroidUtilities.dp(20)) {
                     keyboardHideCallback = () -> postDelayed(()-> onNextPressed(code), 200);
                     AndroidUtilities.hideKeyboard(fragmentView);
+                    return;
+                }
+
+                if (USE_NASIGRAM_CONFIRM_SHEET) {
+                    AndroidUtilities.hideKeyboard(fragmentView);
+                    showNasiGramConfirmSheet(phoneNumber, code);
                     return;
                 }
 
@@ -3935,6 +3976,11 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             currentType = type;
             setOrientation(VERTICAL);
 
+            // NasiGram iOS 26 Liquid Glass: match PhoneView gradient background (visual only)
+            if (currentType == AUTH_TYPE_SMS) {
+                setBackground(PhoneView.glassLoginBackground());
+            }
+
             confirmTextView = new TextView(context);
             confirmTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);
             confirmTextView.setLineSpacing(AndroidUtilities.dp(2), 1.0f);
@@ -4054,7 +4100,11 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                     blueImageView.setTranslationY(-AndroidUtilities.dp(24));
                 }
                 frameLayout.addView(blueImageView, LayoutHelper.createFrame(size, size, Gravity.LEFT | Gravity.TOP, 0, 0, 0, currentType == AUTH_TYPE_MESSAGE && !AndroidUtilities.isSmallScreen() ? -AndroidUtilities.dp(16) : 0));
-                titleTextView.setText(overrideTitle != null ? overrideTitle : getString(currentType == AUTH_TYPE_MESSAGE ? R.string.SentAppCodeTitle : R.string.SentSmsCodeTitle));
+                if (currentType == AUTH_TYPE_SMS && overrideTitle == null) {
+                    titleTextView.setText(LocaleController.getString(R.string.NasiGramEnterCodeTitle));
+                } else {
+                    titleTextView.setText(overrideTitle != null ? overrideTitle : getString(currentType == AUTH_TYPE_MESSAGE ? R.string.SentAppCodeTitle : R.string.SentSmsCodeTitle));
+                }
                 addView(titleTextView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL | Gravity.TOP, 0, 18, 0, 0));
                 int sideMargin = currentType == AUTH_TYPE_FRAGMENT_SMS ? 16 : 0;
                 addView(confirmTextView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL | Gravity.TOP, sideMargin, 17, sideMargin, 0));
@@ -9234,6 +9284,225 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             void onEditPressed(PhoneNumberConfirmView confirmView, TextView editTextView);
             void onConfirmPressed(PhoneNumberConfirmView confirmView, TextView confirmTextView);
             void onDismiss(PhoneNumberConfirmView confirmView);
+        }
+    }
+
+    /**
+     * NasiGram iOS 26 Liquid Glass — bottom sheet that confirms the entered phone number.
+     * Additive alternative to the legacy floating PhoneNumberConfirmView: same login flow,
+     * modern sheet presentation (grabber, big number, primary/secondary pill buttons).
+     */
+    private final static class NasiGramConfirmSheet extends FrameLayout {
+        private ICallback callback;
+        private ViewGroup fragmentView;
+        private View fabContainer;
+        private int fabPrevVisibility = -1;
+
+        private View blurredView;
+        private View dimmView;
+        private FrameLayout sheetContainer;
+        private TextView titleView;
+        private TextView numberView;
+        private TextView subtitleView;
+        private TextView confirmBtn;
+        private TextView editBtn;
+
+        private boolean dismissed;
+        private boolean progressShown;
+
+        private NasiGramConfirmSheet(@NonNull Context context, ViewGroup fragmentView, View fabContainer, String numberText, ICallback callback) {
+            super(context);
+
+            this.fragmentView = fragmentView;
+            this.fabContainer = fabContainer;
+            this.callback = callback;
+
+            blurredView = new View(getContext());
+            blurredView.setOnClickListener(v -> dismiss());
+            addView(blurredView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
+
+            dimmView = new View(getContext());
+            dimmView.setBackgroundColor(0x40000000);
+            dimmView.setAlpha(0);
+            addView(dimmView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
+
+            boolean dark = Theme.isCurrentThemeDark();
+
+            sheetContainer = new FrameLayout(context);
+            GradientDrawable sheetBg = new GradientDrawable(GradientDrawable.Orientation.TL_BR,
+                    dark ? new int[]{0xF818202F, 0xF60F1524, 0xF40D1220} : new int[]{0xFAFFFFFF, 0xF6FBFCFF, 0xF2F3F8FF});
+            float sheetRadius = AndroidUtilities.dp(28);
+            sheetBg.setShape(GradientDrawable.RECTANGLE);
+            sheetBg.setCornerRadius(sheetRadius);
+            sheetContainer.setBackground(sheetBg);
+            addView(sheetContainer, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.BOTTOM, 10, 0, 10, 12));
+
+            LinearLayout content = new LinearLayout(context);
+            content.setOrientation(VERTICAL);
+            content.setGravity(Gravity.CENTER_HORIZONTAL);
+            content.setPadding(AndroidUtilities.dp(20), AndroidUtilities.dp(10), AndroidUtilities.dp(20), AndroidUtilities.dp(18));
+            sheetContainer.addView(content, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
+
+            View grabberView = new View(context);
+            GradientDrawable grabberBg = new GradientDrawable();
+            grabberBg.setShape(GradientDrawable.RECTANGLE);
+            grabberBg.setCornerRadius(AndroidUtilities.dp(999));
+            grabberBg.setColor(dark ? 0x33FFFFFF : 0x1F0D2A4A);
+            grabberView.setBackground(grabberBg);
+            content.addView(grabberView, LayoutHelper.createLinear(44, 4, Gravity.CENTER_HORIZONTAL, 0, 0, 0, 16));
+
+            titleView = new TextView(context);
+            titleView.setText(getString(R.string.ConfirmCorrectNumber));
+            titleView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20);
+            titleView.setTypeface(AndroidUtilities.bold());
+            titleView.setGravity(Gravity.CENTER);
+            titleView.setTextColor(Theme.getColor(Theme.key_dialogTextBlack));
+            content.addView(titleView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, 0, 0, 0, 8));
+
+            numberView = new TextView(context);
+            numberView.setText(numberText);
+            numberView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 23);
+            numberView.setTypeface(AndroidUtilities.bold());
+            numberView.setGravity(Gravity.CENTER);
+            numberView.setTextDirection(View.TEXT_DIRECTION_LTR);
+            numberView.setTextColor(0xFF1884E0);
+            content.addView(numberView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, 0, 0, 0, 8));
+
+            subtitleView = new TextView(context);
+            subtitleView.setText(getString(R.string.NasiGramConfirmSubtitle));
+            subtitleView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
+            subtitleView.setGravity(Gravity.CENTER);
+            subtitleView.setLineSpacing(dp(2), 1.0f);
+            subtitleView.setTextColor(Theme.getColor(Theme.key_dialogTextGray2));
+            content.addView(subtitleView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, 0, 0, 0, 20));
+
+            confirmBtn = new TextView(context);
+            confirmBtn.setText(getString(R.string.NasiGramConfirmSend));
+            confirmBtn.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
+            confirmBtn.setTypeface(AndroidUtilities.bold());
+            confirmBtn.setTextColor(0xFFFFFFFF);
+            confirmBtn.setGravity(Gravity.CENTER);
+            confirmBtn.setBackground(PhoneView.glassCta(26f));
+            confirmBtn.setOnClickListener(v -> {
+                if (!progressShown && callback != null) {
+                    callback.onConfirmPressed(this);
+                }
+            });
+            confirmBtn.setContentDescription(getString(R.string.CheckPhoneNumberYes));
+            content.addView(confirmBtn, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 52, Gravity.CENTER_HORIZONTAL, 0, 0, 0, 10));
+
+            editBtn = new TextView(context);
+            editBtn.setText(getString(R.string.NasiGramConfirmEdit));
+            editBtn.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);
+            editBtn.setTypeface(AndroidUtilities.bold());
+            editBtn.setGravity(Gravity.CENTER);
+            editBtn.setTextColor(dark ? 0xFF8FC7FF : 0xFF1673D2);
+            GradientDrawable editBg = new GradientDrawable();
+            editBg.setShape(GradientDrawable.RECTANGLE);
+            editBg.setCornerRadius(AndroidUtilities.dp(26));
+            editBg.setColor(dark ? 0x1AFFFFFF : 0x140D2A4A);
+            editBtn.setBackground(new RippleDrawable(android.content.res.ColorStateList.valueOf(dark ? 0x24FFFFFF : 0x240D2A4A), editBg, null));
+            editBtn.setOnClickListener(v -> {
+                if (!progressShown && callback != null) {
+                    callback.onEditPressed(this);
+                }
+            });
+            editBtn.setContentDescription(getString(R.string.Edit));
+            content.addView(editBtn, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 46, Gravity.CENTER_HORIZONTAL, 0, 0, 0, 0));
+        }
+
+        private void pressConfirm() {
+            confirmBtn.callOnClick();
+        }
+
+        private void animateProgress(Runnable callback) {
+            progressShown = true;
+            confirmBtn.setEnabled(false);
+            editBtn.setEnabled(false);
+            AndroidUtilities.runOnUIThread(callback, 400);
+        }
+
+        private void show() {
+            if (fabContainer != null) {
+                fabPrevVisibility = fabContainer.getVisibility();
+                fabContainer.setVisibility(GONE);
+            }
+
+            float scaleFactor = 10;
+            int w = (int) (fragmentView.getMeasuredWidth() / scaleFactor);
+            int h = (int) (fragmentView.getMeasuredHeight() / scaleFactor);
+            if (w > 0 && h > 0) {
+                try {
+                    Bitmap bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+                    Canvas canvas = new Canvas(bitmap);
+                    canvas.scale(1.0f / scaleFactor, 1.0f / scaleFactor);
+                    canvas.drawColor(Theme.getColor(Theme.key_windowBackgroundWhite));
+                    fragmentView.draw(canvas);
+                    Utilities.stackBlurBitmap(bitmap, Math.max(8, Math.max(w, h) / 150));
+                    blurredView.setBackground(new BitmapDrawable(getContext().getResources(), bitmap));
+                } catch (Exception e) {
+                    FileLog.e(e);
+                }
+            }
+            blurredView.setAlpha(0.0f);
+            blurredView.setVisibility(View.VISIBLE);
+
+            sheetContainer.setAlpha(0f);
+            fragmentView.addView(this);
+
+            ValueAnimator anim = ValueAnimator.ofFloat(0, 1).setDuration(280);
+            anim.addUpdateListener(animation -> {
+                float val = (float) animation.getAnimatedValue();
+                blurredView.setAlpha(val);
+                dimmView.setAlpha(val);
+                sheetContainer.setAlpha(val);
+                int sh = sheetContainer.getMeasuredHeight();
+                if (sh > 0) {
+                    sheetContainer.setTranslationY((1f - val) * sh);
+                }
+            });
+            anim.setInterpolator(CubicBezierInterpolator.DEFAULT);
+            sheetContainer.post(anim::start);
+        }
+
+        private void dismiss() {
+            if (dismissed) return;
+            dismissed = true;
+
+            if (callback != null) {
+                callback.onDismiss(this);
+            }
+
+            ValueAnimator anim = ValueAnimator.ofFloat(1, 0).setDuration(220);
+            anim.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    if (getParent() instanceof ViewGroup) {
+                        ((ViewGroup) getParent()).removeView(NasiGramConfirmSheet.this);
+                    }
+                    if (fabContainer != null && fabPrevVisibility != -1) {
+                        fabContainer.setVisibility(fabPrevVisibility);
+                    }
+                }
+            });
+            anim.addUpdateListener(animation -> {
+                float val = (float) animation.getAnimatedValue();
+                blurredView.setAlpha(val);
+                dimmView.setAlpha(val);
+                sheetContainer.setAlpha(val);
+                int sh = sheetContainer.getMeasuredHeight();
+                if (sh > 0) {
+                    sheetContainer.setTranslationY((1f - val) * sh);
+                }
+            });
+            anim.setInterpolator(CubicBezierInterpolator.DEFAULT);
+            anim.start();
+        }
+
+        private interface ICallback {
+            void onConfirmPressed(NasiGramConfirmSheet sheet);
+            void onEditPressed(NasiGramConfirmSheet sheet);
+            void onDismiss(NasiGramConfirmSheet sheet);
         }
     }
 

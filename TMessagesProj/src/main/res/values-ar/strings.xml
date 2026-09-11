@@ -705,6 +705,11 @@
     <string name="CheckPhoneNumberInfo">يرجى إبقاء رقم هاتفك محدّثًا؛ لضمان قدرتك على تسجيل الدخول إلى تيليجرام. **معرفة المزيد**</string>
     <string name="CheckPhoneNumberLearnMoreUrl">https://telegram.org/faq/ar#g2</string>
     <string name="CheckPhoneNumberYes">نعم</string>
+    <!-- NasiGram login confirm sheet (added) -->
+    <string name="NasiGramConfirmSubtitle">سنرسل رمز التحقق إلى هذا الرقم</string>
+    <string name="NasiGramConfirmSend">نعم، الرقم صحيح — أرسل الرمز</string>
+    <string name="NasiGramConfirmEdit">تعديل الرقم</string>
+    <string name="NasiGramEnterCodeTitle">أدخل رمز التحقق</string>
     <string name="CheckPhoneNumberNo">لا</string>
     <!--permissions-->
     <string name="PermissionStorageWithHint">يحتاج تيليجرام الوصول إلى التخزين للتمكّن من إرسال وحفظ: الصور، الفيديو، الوسائط والمستندات. يرجى تمكين **الملفات والوسائط** في إعدادات الهاتف &gt; الأذونات.</string>

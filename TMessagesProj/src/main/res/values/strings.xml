@@ -2804,6 +2804,11 @@
     <string name="CheckPhoneNumberInfo">Keep your number up to date to ensure you can always log into Telegram. **Learn more**</string>
     <string name="CheckPhoneNumberLearnMoreUrl">https://telegram.org/faq#q-i-have-a-new-phone-number-what-do-i-do</string>
     <string name="CheckPhoneNumberYes">Yes</string>
+    <!-- NasiGram login confirm sheet (added) -->
+    <string name="NasiGramConfirmSubtitle">We will send a verification code to this number</string>
+    <string name="NasiGramConfirmSend">Yes, send the code</string>
+    <string name="NasiGramConfirmEdit">Edit number</string>
+    <string name="NasiGramEnterCodeTitle">Enter verification code</string>
     <string name="CheckPhoneNumberYes2">👍 Yes</string>
     <string name="CheckPhoneNumberNo">No</string>
     <!--cache view-->
