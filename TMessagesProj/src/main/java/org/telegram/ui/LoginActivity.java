@@ -9338,7 +9338,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             addView(sheetContainer, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.BOTTOM, 10, 0, 10, 12));
 
             LinearLayout content = new LinearLayout(context);
-            content.setOrientation(VERTICAL);
+            content.setOrientation(LinearLayout.VERTICAL);
             content.setGravity(Gravity.CENTER_HORIZONTAL);
             content.setPadding(AndroidUtilities.dp(20), AndroidUtilities.dp(10), AndroidUtilities.dp(20), AndroidUtilities.dp(18));
             sheetContainer.addView(content, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
