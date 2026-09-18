@@ -46,6 +46,10 @@ android {
                 storePassword 'nasigram2026'
                 keyAlias 'nasigram'
                 keyPassword 'nasigram2026'
+                storeType 'PKCS12'
+                v1SigningEnabled true
+                v2SigningEnabled true
+                enableV3Signing true
             }
         }
     }
@@ -65,7 +69,8 @@ android {
         }
     }
 
-    defaultConfig.versionCode = Integer.parseInt(APP_VERSION_CODE)
+    def runNumber = Integer.parseInt(System.getenv("GITHUB_RUN_NUMBER") ?: "0")
+    defaultConfig.versionCode = Integer.parseInt(APP_VERSION_CODE) + runNumber
 
     defaultConfig {
         versionName APP_VERSION_NAME
@@ -107,7 +112,7 @@ androidComponents {
             def abi = output.filters.find { it.filterType == FilterConfiguration.FilterType.ABI }?.identifier
             def abiName = abi ?: "universal"
             def baseVersionCode = output.versionCode.get()
-            output.outputFileName.set("NasiGram-${output.versionName.get()}-${baseVersionCode}-${abiName}.apk")
+            output.outputFileName.set("NasiGram---.apk")
             output.versionCode.set(baseVersionCode * 10)
         }
     }
