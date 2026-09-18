@@ -35,33 +35,31 @@ android {
     }
 
     signingConfigs {
-        if (localProperties.getProperty("storeFile") != null) {
-            sign {
+        sign {
+            if (localProperties.getProperty("storeFile") != null) {
                 storeFile file(localProperties.getProperty("storeFile"))
                 storePassword localProperties.getProperty("storePassword")
                 keyAlias localProperties.getProperty("keyAlias")
                 keyPassword localProperties.getProperty("keyPassword")
+            } else {
+                storeFile file(project.rootProject.file('keystore/nasigram.p12'))
+                storePassword 'nasigram2026'
+                keyAlias 'nasigram'
+                keyPassword 'nasigram2026'
             }
         }
     }
 
     buildTypes {
         debug {
-            if (localProperties.getProperty("storeFile") != null) {
-                signingConfig signingConfigs.sign
-            }
-            applicationIdSuffix ".beta"
+            signingConfig signingConfigs.sign
         }
 
         release {
             minifyEnabled true
             shrinkResources true
             vcsInfo.include false
-            if (localProperties.getProperty("storeFile") != null) {
-                signingConfig signingConfigs.sign
-            } else {
-                signingConfig signingConfigs.debug
-            }
+            signingConfig signingConfigs.sign
             proguardFiles '../TMessagesProj/proguard-rules.pro'
             ndk.debugSymbolLevel 'FULL'
         }
