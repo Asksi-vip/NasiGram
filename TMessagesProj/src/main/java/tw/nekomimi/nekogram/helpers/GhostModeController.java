@@ -22,6 +22,12 @@ import org.telegram.messenger.ApplicationLoader;
  *    may still cause the Telegram server to observe network connectivity.
  * 5. Save Deleted Messages: Client-side retention of incoming messages before deletion across private chats, groups, channels, bots.
  * 6. Save Edited Messages: Client-side retention of previous versions of messages before applying updates.
+ * 7. Save Self-Destruct Media: Bypasses TTL-based file deletion for self-destructing photos/videos via NekoConfig.shouldNOTTrustMe.
+ *
+ * INDEPENDENCE MODEL:
+ * - Ghost Mode (master toggle) controls ONLY its own privacy sub-features (hide read/typing/recording/online/lastSeen/stories).
+ * - Save Deleted Messages, Save Edited Messages, and Save Self-Destruct Media are FULLY INDEPENDENT.
+ *   They have their own preferences and work regardless of Ghost Mode state.
  */
 public class GhostModeController {
 
@@ -34,6 +40,9 @@ public class GhostModeController {
     private static final String PREF_HIDE_STORY_VIEWS = "ghost_hide_story_views";
     private static final String PREF_SAVE_DELETED_MESSAGES = "ghost_save_deleted";
     private static final String PREF_SAVE_EDITED_MESSAGES = "ghost_save_edited";
+    // saveSelfDestructMedia reuses NekoConfig's "shouldNOTTrustMe" key so FileLoader
+    // automatically picks it up without any additional hook.
+    private static final String PREF_SAVE_SELF_DESTRUCT_MEDIA = "shouldNOTTrustMe";
 
     private static volatile boolean initialized = false;
 
@@ -46,6 +55,7 @@ public class GhostModeController {
     private static boolean hideStoryViews;
     private static boolean saveDeletedMessages;
     private static boolean saveEditedMessages;
+    private static boolean saveSelfDestructMedia;
 
     private static final Object lock = new Object();
 
@@ -67,13 +77,15 @@ public class GhostModeController {
                     hideStoryViews = prefs.getBoolean(PREF_HIDE_STORY_VIEWS, false);
                     saveDeletedMessages = prefs.getBoolean(PREF_SAVE_DELETED_MESSAGES, false);
                     saveEditedMessages = prefs.getBoolean(PREF_SAVE_EDITED_MESSAGES, false);
+                    // Read from NekoConfig's shared pref key so the two stay in sync
+                    saveSelfDestructMedia = prefs.getBoolean(PREF_SAVE_SELF_DESTRUCT_MEDIA, false);
                     initialized = true;
                 }
             }
         }
     }
 
-    // --- Master Toggle ---
+    // --- Master Toggle (controls ONLY Ghost Mode privacy sub-features) ---
 
     public static boolean isEnabled() {
         checkInit();
@@ -90,7 +102,7 @@ public class GhostModeController {
         setGhostMode(!isEnabled());
     }
 
-    // --- Sub-Preferences (Raw values, retained even when master toggle is OFF) ---
+    // --- Ghost Mode Sub-Preferences ---
 
     public static boolean isHideReadEnabled() {
         checkInit();
@@ -182,6 +194,9 @@ public class GhostModeController {
         setHideStoryViews(!isHideStoryViewsEnabled());
     }
 
+    // --- Independent Message Tracking Preferences ---
+    // These are NOT gated by Ghost Mode. Each has its own independent on/off switch.
+
     public static boolean isSaveDeletedMessagesEnabled() {
         checkInit();
         return saveDeletedMessages;
@@ -212,7 +227,35 @@ public class GhostModeController {
         setSaveEditedMessages(!isSaveEditedMessagesEnabled());
     }
 
+    public static boolean isSaveSelfDestructMediaEnabled() {
+        checkInit();
+        return saveSelfDestructMedia;
+    }
+
+    /**
+     * Enables/disables saving of self-destruct photos and videos.
+     *
+     * Implementation note: This writes to the "shouldNOTTrustMe" key in "nekoconfig" SharedPreferences.
+     * FileLoader reads NekoConfig.shouldNOTTrustMe (loaded from the same key) and uses it to decide
+     * whether to treat TTL-marked media as regular cached files instead of self-destructing ones.
+     * By syncing to the same key, we avoid any additional hook in FileLoader.
+     */
+    public static void setSaveSelfDestructMedia(boolean enabled) {
+        checkInit();
+        saveSelfDestructMedia = enabled;
+        // Write to NekoConfig's own pref key so NekoConfig.shouldNOTTrustMe stays in sync at next load.
+        getPreferences().edit().putBoolean(PREF_SAVE_SELF_DESTRUCT_MEDIA, enabled).apply();
+        // Also update NekoConfig's in-memory field directly so the change takes effect immediately
+        // without requiring an app restart.
+        tw.nekomimi.nekogram.NekoConfig.shouldNOTTrustMe = enabled;
+    }
+
+    public static void toggleSaveSelfDestructMedia() {
+        setSaveSelfDestructMedia(!isSaveSelfDestructMediaEnabled());
+    }
+
     // --- Decision Methods used across the codebase ---
+    // Ghost Mode sub-features: REQUIRE master toggle to be ON.
 
     public static boolean shouldHideRead() {
         return isEnabled() && isHideReadEnabled();
@@ -238,16 +281,21 @@ public class GhostModeController {
         return isEnabled() && isHideStoryViewsEnabled();
     }
 
-    /**
-     * Deleted/Edited message saving is intentionally independent from the Ghost Mode master toggle.
-     * Users can enable these features even when Ghost Mode is off.
-     */
+    // Message Tracking features: INDEPENDENT from Ghost Mode master toggle.
+
+    /** Returns true if deleted messages should be intercepted and stored locally. */
     public static boolean shouldSaveDeletedMessages() {
         return isSaveDeletedMessagesEnabled();
     }
 
+    /** Returns true if previous message versions should be captured before edits are applied. */
     public static boolean shouldSaveEditedMessages() {
         return isSaveEditedMessagesEnabled();
+    }
+
+    /** Returns true if self-destruct media (TTL photos/videos) should bypass deletion and be saved. */
+    public static boolean shouldSaveSelfDestructMedia() {
+        return isSaveSelfDestructMediaEnabled();
     }
 
     public static void onMessageSent(int currentAccount) {

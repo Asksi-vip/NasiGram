@@ -22,6 +22,8 @@
     <string name="GhostSaveDeletedAbout">Keep a local copy of incoming messages before they are deleted.</string>
     <string name="GhostSaveEdited">Save Edited Messages</string>
     <string name="GhostSaveEditedAbout">Keep the previous version of messages when they are edited.</string>
+    <string name="GhostSaveSelfDestruct">Save Self-Destruct Media</string>
+    <string name="GhostSaveSelfDestructAbout">Bypass TTL expiry and keep self-destructing photos and videos after viewing.</string>
     <string name="GhostEditHistory">Edit History</string>
     <string name="GhostOriginalMessage">Before edit</string>
     <string name="GhostCurrentMessage">After edit</string>

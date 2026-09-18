@@ -19,6 +19,8 @@
     <string name="GhostSaveDeletedAbout">احتفظ بنسخة محلية من الرسائل التي تصلك قبل أن يُحذفها المرسل.</string>
     <string name="GhostSaveEdited">✏️ حفظ الرسائل المعدّلة</string>
     <string name="GhostSaveEditedAbout">احتفظ بالنسخة القديمة من الرسالة قبل أن يعدّلها المرسل.</string>
+    <string name="GhostSaveSelfDestruct">📸 حفظ الوسائط ذاتية التدمير</string>
+    <string name="GhostSaveSelfDestructAbout">احتفظ بالصور والفيديوهات ذات المهلة الزمنية بعد عرضها بدلاً من حذفها تلقائياً.</string>
     <string name="GhostEditHistory">سجل التعديلات</string>
     <string name="GhostOriginalMessage">قبل التعديل</string>
     <string name="GhostCurrentMessage">بعد التعديل</string>

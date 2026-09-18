@@ -13,6 +13,7 @@ import tw.nekomimi.nekogram.helpers.GhostModeController;
 
 public class NekoSettingsActivity extends BaseNekoSettingsActivity {
 
+    // Ghost Mode section rows
     private final int ghostModeRow = rowId++;
     private final int hideReadRow = rowId++;
     private final int hideTypingRow = rowId++;
@@ -20,8 +21,11 @@ public class NekoSettingsActivity extends BaseNekoSettingsActivity {
     private final int hideOnlineRow = rowId++;
     private final int freezeLastSeenRow = rowId++;
     private final int hideStoryViewsRow = rowId++;
+
+    // Message Tracking section rows (fully independent from Ghost Mode)
     private final int saveDeletedRow = rowId++;
     private final int saveEditedRow = rowId++;
+    private final int saveSelfDestructRow = rowId++;
 
     @Override
     protected void fillItems(ArrayList<UItem> items, UniversalAdapter adapter) {
@@ -65,7 +69,7 @@ public class NekoSettingsActivity extends BaseNekoSettingsActivity {
 
         items.add(UItem.asShadow(LocaleController.getString(R.string.GhostModeAbout)));
 
-        // ─── Message Tracking Section (independent of Ghost Mode) ───
+        // ─── Message Tracking Section (fully independent of Ghost Mode) ───
         items.add(UItem.asHeader(LocaleController.getString(R.string.MessageTrackingHeader)));
 
         items.add(UItem.asCheck(saveDeletedRow, LocaleController.getString(R.string.GhostSaveDeleted), LocaleController.getString(R.string.GhostSaveDeletedAbout))
@@ -76,6 +80,10 @@ public class NekoSettingsActivity extends BaseNekoSettingsActivity {
                 .slug("ghost_save_edited")
                 .setChecked(GhostModeController.isSaveEditedMessagesEnabled()));
 
+        items.add(UItem.asCheck(saveSelfDestructRow, LocaleController.getString(R.string.GhostSaveSelfDestruct), LocaleController.getString(R.string.GhostSaveSelfDestructAbout))
+                .slug("ghost_save_self_destruct")
+                .setChecked(GhostModeController.isSaveSelfDestructMediaEnabled()));
+
         items.add(UItem.asShadow(LocaleController.getString(R.string.MessageTrackingAbout)));
     }
 
@@ -83,7 +91,7 @@ public class NekoSettingsActivity extends BaseNekoSettingsActivity {
     protected void onItemClick(UItem item, View view, int position, float x, float y) {
         int id = item.id;
 
-        // Message Tracking items are always clickable, regardless of Ghost Mode state
+        // ── Message Tracking items: always clickable, no Ghost Mode dependency ──
         if (id == saveDeletedRow) {
             GhostModeController.toggleSaveDeletedMessages();
             if (listView != null && listView.adapter != null) {
@@ -96,9 +104,15 @@ public class NekoSettingsActivity extends BaseNekoSettingsActivity {
                 listView.adapter.update(true);
             }
             return;
+        } else if (id == saveSelfDestructRow) {
+            GhostModeController.toggleSaveSelfDestructMedia();
+            if (listView != null && listView.adapter != null) {
+                listView.adapter.update(true);
+            }
+            return;
         }
 
-        // Ghost Mode items require master toggle check
+        // ── Ghost Mode items: require master toggle to be ON ──
         if (id == ghostModeRow) {
             GhostModeController.toggleGhostMode();
             if (listView != null && listView.adapter != null) {
