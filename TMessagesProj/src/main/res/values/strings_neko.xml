@@ -3,7 +3,7 @@
     <string name="AppNameNeko" translatable="false">NasiGram</string>
     <string name="Nekogram" translatable="false">NasiGram</string>
     <string name="NekogramBeta" translatable="false">NasiGram</string>
-    <string name="NekoSettings">Neko Settings</string>
+    <string name="NekoSettings">إعدادات NasiGram</string>
     <string name="PreferIPv6">Prefer connecting through IPv6</string>
     <string name="MessageMenu">Message menu</string>
     <string name="HidePhone">Hide my phone number</string>
