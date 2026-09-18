@@ -238,12 +238,16 @@ public class GhostModeController {
         return isEnabled() && isHideStoryViewsEnabled();
     }
 
+    /**
+     * Deleted/Edited message saving is intentionally independent from the Ghost Mode master toggle.
+     * Users can enable these features even when Ghost Mode is off.
+     */
     public static boolean shouldSaveDeletedMessages() {
-        return isEnabled() && isSaveDeletedMessagesEnabled();
+        return isSaveDeletedMessagesEnabled();
     }
 
     public static boolean shouldSaveEditedMessages() {
-        return isEnabled() && isSaveEditedMessagesEnabled();
+        return isSaveEditedMessagesEnabled();
     }
 
     public static void onMessageSent(int currentAccount) {

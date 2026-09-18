@@ -23,8 +23,11 @@
     <string name="GhostSaveEdited">Save Edited Messages</string>
     <string name="GhostSaveEditedAbout">Keep the previous version of messages when they are edited.</string>
     <string name="GhostEditHistory">Edit History</string>
-    <string name="GhostOriginalMessage">Original Version</string>
+    <string name="GhostOriginalMessage">Before edit</string>
+    <string name="GhostCurrentMessage">After edit</string>
     <string name="GhostDeletedBadge">Deleted</string>
+    <string name="MessageTrackingHeader">Message Tracking</string>
+    <string name="MessageTrackingAbout">These options work independently from Ghost Mode.</string>
     <string name="PreferIPv6">Prefer connecting through IPv6</string>
     <string name="MessageMenu">Message menu</string>
     <string name="HidePhone">Hide my phone number</string>
