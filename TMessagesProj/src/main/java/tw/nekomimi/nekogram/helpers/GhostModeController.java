@@ -1,4 +1,4 @@
-package tw.nekomimi.nekogram.helpers;
+﻿package tw.nekomimi.nekogram.helpers;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
@@ -198,5 +198,11 @@ public class GhostModeController {
 
     public static boolean shouldHideStoryViews() {
         return isEnabled() && isHideStoryViewsEnabled();
+    }
+
+    public static void onMessageSent(int currentAccount) {
+        if (shouldHideOnline()) {
+            org.telegram.messenger.MessagesController.getInstance(currentAccount).markOfflineAfterAction();
+        }
     }
 }

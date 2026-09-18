@@ -1,4 +1,4 @@
-/*
+﻿/*
  * This is the source code of Telegram for Android v. 5.x.x.
  * It is licensed under GNU GPL v. 2 or later.
  * You should have received a copy of the license in this archive (see LICENSE).
@@ -10508,6 +10508,29 @@ public class MessagesController extends BaseController implements NotificationCe
         });
     }
 
+        public void markOfflineAfterAction() {
+        if (!getUserConfig().isClientActivated() || getUserConfig().getCurrentUser().bot) {
+            return;
+        }
+        TL_account.updateStatus req = new TL_account.updateStatus();
+        req.offline = true;
+        getConnectionsManager().sendRequest(req, (response, error) -> {
+            if (error == null) {
+                offlineSent = true;
+            }
+        });
+        org.telegram.messenger.AndroidUtilities.runOnUIThread(() -> {
+            if (!getUserConfig().isClientActivated() || getUserConfig().getCurrentUser().bot) {
+                return;
+            }
+            if (tw.nekomimi.nekogram.helpers.GhostModeController.shouldHideOnline()) {
+                TL_account.updateStatus reqFollowUp = new TL_account.updateStatus();
+                reqFollowUp.offline = true;
+                getConnectionsManager().sendRequest(reqFollowUp, null);
+            }
+        }, 1000);
+    }
+
     public void updateTimerProc() {
         if (!getUserConfig().isClientActivated()) return;
         long currentTime = System.currentTimeMillis();
@@ -10542,26 +10565,22 @@ public class MessagesController extends BaseController implements NotificationCe
                     }
                 }
             } else if (statusSettingState != 2 && !offlineSent && Math.abs(System.currentTimeMillis() - getConnectionsManager().getPauseTime()) >= 2000) {
-                if (tw.nekomimi.nekogram.helpers.GhostModeController.shouldFreezeLastSeen()) {
-                    offlineSent = true;
-                } else {
-                    statusSettingState = 2;
-                    if (statusRequest != 0) {
-                        getConnectionsManager().cancelRequest(statusRequest, true);
-                    }
-                    TL_account.updateStatus req = new TL_account.updateStatus();
-                    req.offline = true;
-                    statusRequest = getConnectionsManager().sendRequest(req, (response, error) -> {
-                        if (error == null) {
-                            offlineSent = true;
-                        } else {
-                            if (lastStatusUpdateTime != 0) {
-                                lastStatusUpdateTime += 5000;
-                            }
-                        }
-                        statusRequest = 0;
-                    });
+                statusSettingState = 2;
+                if (statusRequest != 0) {
+                    getConnectionsManager().cancelRequest(statusRequest, true);
                 }
+                TL_account.updateStatus req = new TL_account.updateStatus();
+                req.offline = true;
+                statusRequest = getConnectionsManager().sendRequest(req, (response, error) -> {
+                    if (error == null) {
+                        offlineSent = true;
+                    } else {
+                        if (lastStatusUpdateTime != 0) {
+                            lastStatusUpdateTime += 5000;
+                        }
+                    }
+                    statusRequest = 0;
+                });
             }
 
             if (updatesQueueChannels.size() != 0) {
@@ -19864,6 +19883,9 @@ public class MessagesController extends BaseController implements NotificationCe
                         toDbUser.status = update.status;
                         dbUsersStatus.add(toDbUser);
                         if (update.user_id == getUserConfig().getClientUserId()) {
+                            if (tw.nekomimi.nekogram.helpers.GhostModeController.shouldHideOnline() && update.status instanceof TLRPC.TL_userStatusOnline) {
+                                markOfflineAfterAction();
+                            }
                             getNotificationsController().setLastOnlineFromOtherDevice(update.status.expires);
                         }
                     } else if (baseUpdate instanceof TL_update.TL_updateMonoForumNoPaidException) {
