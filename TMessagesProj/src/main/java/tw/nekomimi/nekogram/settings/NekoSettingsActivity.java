@@ -107,7 +107,7 @@ public class NekoSettingsActivity extends BaseNekoSettingsActivity {
     }
 
     @Override
-    protected String getTitle() {
+    protected String getActionBarTitle() {
         return LocaleController.getString(R.string.NekoSettings);
     }
 }
