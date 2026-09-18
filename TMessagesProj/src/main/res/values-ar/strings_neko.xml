@@ -1,6 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="NekoSettings">إعدادات NasiGram</string>
+    <string name="GhostMode">👻 وضع الشبح (Ghost Mode)</string>
+    <string name="GhostModeAbout">تحكم بظهور نشاطك للآخرين.</string>
+    <string name="GhostHideRead">إخفاء حالة القراءة</string>
+    <string name="GhostHideReadAbout">عدم إرسال إشعار قراءة الرسائل عند فتح المحادثة.</string>
+    <string name="GhostHideTyping">إخفاء حالة الكتابة</string>
+    <string name="GhostHideTypingAbout">منع إرسال حالة \'يكتب الآن...\' أثناء كتابة الرسائل.</string>
+    <string name="GhostHideRecording">إخفاء حالة التسجيل</string>
+    <string name="GhostHideRecordingAbout">منع إرسال حالة تسجيل الصوت أو الفيديو.</string>
+    <string name="GhostHideOnline">إخفاء Online</string>
+    <string name="GhostHideOnlineAbout">منع إرسال إشعار التواجد متصلاً عند استخدام التطبيق.</string>
+    <string name="GhostFreezeLastSeen">تجميد آخر ظهور</string>
+    <string name="GhostFreezeLastSeenAbout">عدم تحديث وقت آخر ظهور عند استخدام التطبيق.</string>
+    <string name="GhostHideStoryViews">إخفاء مشاهدة القصص</string>
+    <string name="GhostHideStoryViewsAbout">مشاهدة القصص دون إرسال تأكيد المشاهدة لصاحب القصة.</string>
     <string name="PreferIPv6">تفضيل الاتصال عبر IPv6</string>
     <string name="MessageMenu">اختيارات ضغطة الرسائل</string>
     <string name="HidePhone">إخفاء رقم هاتفي</string>
