@@ -4,6 +4,20 @@
     <string name="Nekogram" translatable="false">NasiGram</string>
     <string name="NekogramBeta" translatable="false">NasiGram</string>
     <string name="NekoSettings">إعدادات NasiGram</string>
+    <string name="GhostMode">Ghost Mode</string>
+    <string name="GhostModeAbout">Control your activity visibility.</string>
+    <string name="GhostHideRead">Hide Read Status</string>
+    <string name="GhostHideReadAbout">Do not send read acknowledgements when opening messages.</string>
+    <string name="GhostHideTyping">Hide Typing</string>
+    <string name="GhostHideTypingAbout">Do not send typing status when composing text.</string>
+    <string name="GhostHideRecording">Hide Recording</string>
+    <string name="GhostHideRecordingAbout">Do not send recording status for voice or video messages.</string>
+    <string name="GhostHideOnline">Hide Online</string>
+    <string name="GhostHideOnlineAbout">Do not broadcast online state when the app is active.</string>
+    <string name="GhostFreezeLastSeen">Freeze Last Seen</string>
+    <string name="GhostFreezeLastSeenAbout">Prevent sending status updates that refresh your last seen timestamp.</string>
+    <string name="GhostHideStoryViews">Hide Story Views</string>
+    <string name="GhostHideStoryViewsAbout">View stories anonymously without sending view confirmations.</string>
     <string name="PreferIPv6">Prefer connecting through IPv6</string>
     <string name="MessageMenu">Message menu</string>
     <string name="HidePhone">Hide my phone number</string>
