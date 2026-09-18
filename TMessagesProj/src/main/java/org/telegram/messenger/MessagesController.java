@@ -1,4 +1,4 @@
-﻿/*
+/*
  * This is the source code of Telegram for Android v. 5.x.x.
  * It is licensed under GNU GPL v. 2 or later.
  * You should have received a copy of the license in this archive (see LICENSE).
@@ -19423,6 +19423,24 @@ public class MessagesController extends BaseController implements NotificationCe
                         message.out = true;
                     }
                 }
+                if (tw.nekomimi.nekogram.helpers.GhostModeController.shouldSaveEditedMessages()) {
+                    try {
+                        long editDialogId = MessageObject.getDialogId(message);
+                        MessageObject existingObj = dialogMessagesByIds.get(message.id);
+                        if (existingObj != null && existingObj.messageOwner != null) {
+                            String oldText = existingObj.messageOwner.message;
+                            String newText = message.message;
+                            if (oldText != null && !oldText.equals(newText)) {
+                                String mediaType = existingObj.messageOwner.media != null ? existingObj.messageOwner.media.getClass().getSimpleName() : null;
+                                String caption = existingObj.caption != null ? existingObj.caption.toString() : null;
+                                int oldDate = existingObj.messageOwner.edit_date != 0 ? existingObj.messageOwner.edit_date : existingObj.messageOwner.date;
+                                tw.nekomimi.nekogram.helpers.EditedMessageStorage.getInstance().saveEditAsync(editDialogId, message.id, oldText, oldDate, mediaType, caption);
+                            }
+                        }
+                    } catch (Exception e) {
+                        FileLog.e(e);
+                    }
+                }
                 if (!message.out) {
                     long from_id = DialogObject.getPeerDialogId(message.from_id);
                     if (from_id == clientUserId) {
@@ -21065,6 +21083,28 @@ public class MessagesController extends BaseController implements NotificationCe
                         continue;
                     }
                     getNotificationCenter().postNotificationName(NotificationCenter.messagesDeleted, arrayList, -dialogId, false);
+                    if (tw.nekomimi.nekogram.helpers.GhostModeController.shouldSaveDeletedMessages()) {
+                        try {
+                            for (int b = 0, size2 = arrayList.size(); b < size2; b++) {
+                                Integer id = arrayList.get(b);
+                                MessageObject obj = dialogMessagesByIds.get(id);
+                                if (obj != null && obj.messageOwner != null) {
+                                    obj.deleted = true;
+                                    long targetDialogId = dialogId != 0 ? dialogId : obj.getDialogId();
+                                    long fromId = obj.messageOwner.from_id != null ? DialogObject.getPeerDialogId(obj.messageOwner.from_id) : 0;
+                                    String text = obj.messageOwner.message;
+                                    String caption = obj.caption != null ? obj.caption.toString() : null;
+                                    String mediaType = obj.messageOwner.media != null ? obj.messageOwner.media.getClass().getSimpleName() : null;
+                                    String mediaPath = tw.nekomimi.nekogram.helpers.MessageHelper.getPathToMessage(obj);
+                                    tw.nekomimi.nekogram.helpers.DeletedMessageStorage.getInstance().saveDeletedMessageAsync(
+                                        targetDialogId, id, fromId, obj.messageOwner.date, (int) (System.currentTimeMillis() / 1000), text, caption, mediaType, mediaPath
+                                    );
+                                }
+                            }
+                        } catch (Exception e) {
+                            FileLog.e(e);
+                        }
+                    }
                     if (dialogId == 0) {
                         for (int b = 0, size2 = arrayList.size(); b < size2; b++) {
                             Integer id = arrayList.get(b);
@@ -21181,6 +21221,9 @@ public class MessagesController extends BaseController implements NotificationCe
             for (int a = 0, size = deletedMessages.size(); a < size; a++) {
                 long key = deletedMessages.keyAt(a);
                 ArrayList<Integer> arrayList = deletedMessages.valueAt(a);
+                if (tw.nekomimi.nekogram.helpers.GhostModeController.shouldSaveDeletedMessages()) {
+                    continue;
+                }
                 getMessagesStorage().getStorageQueue().postRunnable(() -> {
                     ArrayList<Long> dialogIds = getMessagesStorage().markMessagesAsDeleted(key, arrayList, false, true, 0, 0);
                     getMessagesStorage().updateDialogsWithDeletedMessages(key, -key, arrayList, dialogIds);

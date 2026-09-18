@@ -20,6 +20,8 @@ public class NekoSettingsActivity extends BaseNekoSettingsActivity {
     private final int hideOnlineRow = rowId++;
     private final int freezeLastSeenRow = rowId++;
     private final int hideStoryViewsRow = rowId++;
+    private final int saveDeletedRow = rowId++;
+    private final int saveEditedRow = rowId++;
 
     @Override
     protected void fillItems(ArrayList<UItem> items, UniversalAdapter adapter) {
@@ -58,6 +60,16 @@ public class NekoSettingsActivity extends BaseNekoSettingsActivity {
         items.add(UItem.asCheck(hideStoryViewsRow, LocaleController.getString(R.string.GhostHideStoryViews), LocaleController.getString(R.string.GhostHideStoryViewsAbout))
                 .slug("ghost_hide_story_views")
                 .setChecked(GhostModeController.isHideStoryViewsEnabled())
+                .setEnabled(masterEnabled));
+
+        items.add(UItem.asCheck(saveDeletedRow, LocaleController.getString(R.string.GhostSaveDeleted), LocaleController.getString(R.string.GhostSaveDeletedAbout))
+                .slug("ghost_save_deleted")
+                .setChecked(GhostModeController.isSaveDeletedMessagesEnabled())
+                .setEnabled(masterEnabled));
+
+        items.add(UItem.asCheck(saveEditedRow, LocaleController.getString(R.string.GhostSaveEdited), LocaleController.getString(R.string.GhostSaveEditedAbout))
+                .slug("ghost_save_edited")
+                .setChecked(GhostModeController.isSaveEditedMessagesEnabled())
                 .setEnabled(masterEnabled));
 
         items.add(UItem.asShadow(LocaleController.getString(R.string.GhostModeAbout)));
@@ -100,6 +112,16 @@ public class NekoSettingsActivity extends BaseNekoSettingsActivity {
             }
         } else if (id == hideStoryViewsRow) {
             GhostModeController.toggleHideStoryViews();
+            if (listView != null && listView.adapter != null) {
+                listView.adapter.update(true);
+            }
+        } else if (id == saveDeletedRow) {
+            GhostModeController.toggleSaveDeletedMessages();
+            if (listView != null && listView.adapter != null) {
+                listView.adapter.update(true);
+            }
+        } else if (id == saveEditedRow) {
+            GhostModeController.toggleSaveEditedMessages();
             if (listView != null && listView.adapter != null) {
                 listView.adapter.update(true);
             }

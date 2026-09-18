@@ -3,7 +3,7 @@
     <string name="AppNameNeko" translatable="false">NasiGram</string>
     <string name="Nekogram" translatable="false">NasiGram</string>
     <string name="NekogramBeta" translatable="false">NasiGram</string>
-    <string name="NekoSettings">إعدادات NasiGram</string>
+    <string name="NekoSettings">Ø¥Ø¹Ø¯Ø§Ø¯Ø§Øª NasiGram</string>
     <string name="GhostMode">Ghost Mode</string>
     <string name="GhostModeAbout">Control your activity visibility.</string>
     <string name="GhostHideRead">Hide Read Status</string>
@@ -18,6 +18,13 @@
     <string name="GhostFreezeLastSeenAbout">Prevent sending status updates that refresh your last seen timestamp.</string>
     <string name="GhostHideStoryViews">Hide Story Views</string>
     <string name="GhostHideStoryViewsAbout">View stories anonymously without sending view confirmations.</string>
+    <string name="GhostSaveDeleted">Save Deleted Messages</string>
+    <string name="GhostSaveDeletedAbout">Keep a local copy of incoming messages before they are deleted.</string>
+    <string name="GhostSaveEdited">Save Edited Messages</string>
+    <string name="GhostSaveEditedAbout">Keep the previous version of messages when they are edited.</string>
+    <string name="GhostEditHistory">Edit History</string>
+    <string name="GhostOriginalMessage">Original Version</string>
+    <string name="GhostDeletedBadge">Deleted</string>
     <string name="PreferIPv6">Prefer connecting through IPv6</string>
     <string name="MessageMenu">Message menu</string>
     <string name="HidePhone">Hide my phone number</string>
@@ -117,7 +124,7 @@
     <string name="LastUpdateDateFormatted">Last successfully checked on %1$s.</string>
     <string name="LastUpdateRecently">Last successfully checked just now.</string>
     <string name="LastUpdateNever">Never checked since install.</string>
-    <string name="CheckingUpdate">Checking for update…</string>
+    <string name="CheckingUpdate">Checking for updateâ€¦</string>
     <string name="ProviderMicrosoftTranslator">Microsoft Translator</string>
     <string name="TranslationProviderShort">Provider</string>
     <string name="ViewSourceCode">View source code</string>
@@ -256,7 +263,7 @@
     <string name="EmojiSets">Emoji Sets</string>
     <string name="MyEmojiSets">My Emoji Sets</string>
     <string name="InstalledEmojiSet">Installed</string>
-    <string name="InstallingEmojiSet">Installing…</string>
+    <string name="InstallingEmojiSet">Installingâ€¦</string>
     <string name="UpdateEmojiSet">Update %s</string>
     <string name="EmojiSetHint">This affects emoji appearance only for you. Others see them based on their preferences.</string>
     <string name="CustomEmojiSetHint">Import and choose emoji sets from your internal storage.</string>

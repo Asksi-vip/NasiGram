@@ -251,6 +251,21 @@ public class MessageDetailsActivity extends BaseNekoSettingsActivity implements 
         if (messageObject.messageOwner.edit_date != 0) {
             items.add(TextDetailSettingsCellFactory.of(editedRow, "Edited", formatTime(messageObject.messageOwner.edit_date)));
         }
+        long currentDialogId = messageObject.getDialogId();
+        int currentMsgId = messageObject.getId();
+        if (messageObject.deleted || tw.nekomimi.nekogram.helpers.DeletedMessageStorage.getInstance().isDeletedSync(currentDialogId, currentMsgId)) {
+            items.add(TextDetailSettingsCellFactory.of(rowId++, LocaleController.getString(R.string.GhostDeletedBadge), "🗑️ " + LocaleController.getString(R.string.GhostDeletedBadge)));
+        }
+        java.util.ArrayList<tw.nekomimi.nekogram.helpers.EditedMessageStorage.EditRecord> editHistory = tw.nekomimi.nekogram.helpers.EditedMessageStorage.getInstance().getEditHistorySync(currentDialogId, currentMsgId);
+        if (editHistory != null && !editHistory.isEmpty()) {
+            items.add(UItem.asHeader(LocaleController.getString(R.string.GhostEditHistory)));
+            for (int i = 0; i < editHistory.size(); i++) {
+                tw.nekomimi.nekogram.helpers.EditedMessageStorage.EditRecord record = editHistory.get(i);
+                String title = LocaleController.getString(R.string.GhostOriginalMessage) + " (" + formatTime(record.date) + ")";
+                String body = !TextUtils.isEmpty(record.text) ? record.text : (!TextUtils.isEmpty(record.caption) ? record.caption : "[" + record.mediaType + "]");
+                items.add(TextDetailSettingsCellFactory.of(rowId++, title, body));
+            }
+        }
         if (messageObject.isForwarded()) {
             var builder = new StringBuilder();
             if (forwardFromPeer != null) {

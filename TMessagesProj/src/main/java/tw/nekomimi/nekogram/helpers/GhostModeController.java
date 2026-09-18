@@ -1,4 +1,4 @@
-﻿package tw.nekomimi.nekogram.helpers;
+package tw.nekomimi.nekogram.helpers;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
@@ -20,6 +20,8 @@ import org.telegram.messenger.ApplicationLoader;
  * 4. Hide Online & Freeze Last Seen: Client-side suppression of TL_account.updateStatus(offline=false/true).
  *    While active explicit status broadcasts are blocked, certain other MTProto RPC calls (like sending a message)
  *    may still cause the Telegram server to observe network connectivity.
+ * 5. Save Deleted Messages: Client-side retention of incoming messages before deletion across private chats, groups, channels, bots.
+ * 6. Save Edited Messages: Client-side retention of previous versions of messages before applying updates.
  */
 public class GhostModeController {
 
@@ -30,6 +32,8 @@ public class GhostModeController {
     private static final String PREF_HIDE_ONLINE = "ghost_hide_online";
     private static final String PREF_FREEZE_LAST_SEEN = "ghost_freeze_last_seen";
     private static final String PREF_HIDE_STORY_VIEWS = "ghost_hide_story_views";
+    private static final String PREF_SAVE_DELETED_MESSAGES = "ghost_save_deleted";
+    private static final String PREF_SAVE_EDITED_MESSAGES = "ghost_save_edited";
 
     private static volatile boolean initialized = false;
 
@@ -40,6 +44,8 @@ public class GhostModeController {
     private static boolean hideOnline;
     private static boolean freezeLastSeen;
     private static boolean hideStoryViews;
+    private static boolean saveDeletedMessages;
+    private static boolean saveEditedMessages;
 
     private static final Object lock = new Object();
 
@@ -59,6 +65,8 @@ public class GhostModeController {
                     hideOnline = prefs.getBoolean(PREF_HIDE_ONLINE, false);
                     freezeLastSeen = prefs.getBoolean(PREF_FREEZE_LAST_SEEN, false);
                     hideStoryViews = prefs.getBoolean(PREF_HIDE_STORY_VIEWS, false);
+                    saveDeletedMessages = prefs.getBoolean(PREF_SAVE_DELETED_MESSAGES, false);
+                    saveEditedMessages = prefs.getBoolean(PREF_SAVE_EDITED_MESSAGES, false);
                     initialized = true;
                 }
             }
@@ -174,6 +182,36 @@ public class GhostModeController {
         setHideStoryViews(!isHideStoryViewsEnabled());
     }
 
+    public static boolean isSaveDeletedMessagesEnabled() {
+        checkInit();
+        return saveDeletedMessages;
+    }
+
+    public static void setSaveDeletedMessages(boolean enabled) {
+        checkInit();
+        saveDeletedMessages = enabled;
+        getPreferences().edit().putBoolean(PREF_SAVE_DELETED_MESSAGES, enabled).apply();
+    }
+
+    public static void toggleSaveDeletedMessages() {
+        setSaveDeletedMessages(!isSaveDeletedMessagesEnabled());
+    }
+
+    public static boolean isSaveEditedMessagesEnabled() {
+        checkInit();
+        return saveEditedMessages;
+    }
+
+    public static void setSaveEditedMessages(boolean enabled) {
+        checkInit();
+        saveEditedMessages = enabled;
+        getPreferences().edit().putBoolean(PREF_SAVE_EDITED_MESSAGES, enabled).apply();
+    }
+
+    public static void toggleSaveEditedMessages() {
+        setSaveEditedMessages(!isSaveEditedMessagesEnabled());
+    }
+
     // --- Decision Methods used across the codebase ---
 
     public static boolean shouldHideRead() {
@@ -198,6 +236,14 @@ public class GhostModeController {
 
     public static boolean shouldHideStoryViews() {
         return isEnabled() && isHideStoryViewsEnabled();
+    }
+
+    public static boolean shouldSaveDeletedMessages() {
+        return isEnabled() && isSaveDeletedMessagesEnabled();
+    }
+
+    public static boolean shouldSaveEditedMessages() {
+        return isEnabled() && isSaveEditedMessagesEnabled();
     }
 
     public static void onMessageSent(int currentAccount) {

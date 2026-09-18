@@ -116,6 +116,12 @@ public class MessageHelper extends BaseController {
             text.append(' ');
             text.append(formatTime(messageObject.messageOwner.fwd_from.date));
         }
+        if (messageObject.deleted || DeletedMessageStorage.getInstance().isDeletedSync(messageObject.getDialogId(), messageObject.getId())) {
+            text.append("\n🗑️ ").append(LocaleController.getString(R.string.GhostDeletedBadge));
+        }
+        if (EditedMessageStorage.getInstance().hasEditsSync(messageObject.getDialogId(), messageObject.getId())) {
+            text.append(" (").append(LocaleController.getString(R.string.GhostEditHistory)).append(")");
+        }
         return text;
     }
 
