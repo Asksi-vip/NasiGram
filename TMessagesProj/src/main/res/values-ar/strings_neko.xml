@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="NekoSettings">إعدادات نيكو</string>
+    <string name="NekoSettings">إعدادات NasiGram</string>
     <string name="PreferIPv6">تفضيل الاتصال عبر IPv6</string>
     <string name="MessageMenu">اختيارات ضغطة الرسائل</string>
     <string name="HidePhone">إخفاء رقم هاتفي</string>
