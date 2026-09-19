@@ -14161,7 +14161,7 @@ public class MessagesStorage extends BaseController {
                 if (dialogId != 0) {
                     cursor = database.queryFinalized(String.format(Locale.US, "SELECT uid, data, read_state, out, mention, mid FROM messages_v2 WHERE mid IN(%s) AND uid = %d", ids, dialogId));
                 } else {
-                    cursor = database.queryFinalized(String.format(Locale.US, "SELECT uid, data, read_state, out, mention, mid FROM messages_v2 WHERE mid IN(%s) AND is_channel = 0", ids));
+                    cursor = database.queryFinalized(String.format(Locale.US, "SELECT uid, data, read_state, out, mention, mid FROM messages_v2 WHERE mid IN(%s)", ids));
                 }
 
                 try {
@@ -14191,55 +14191,52 @@ public class MessagesStorage extends BaseController {
                                 }
                             }
                         }
-                        if (tw.nekomimi.nekogram.helpers.GhostModeController.shouldSaveDeletedMessages()) {
-                            try {
-                                NativeByteBuffer delData = cursor.byteBufferValue(1);
-                                if (delData != null) {
-                                    int pos = delData.position();
-                                    TLRPC.Message delMsg = TLRPC.Message.TLdeserialize(delData, delData.readInt32(false), false);
-                                    delData.position(pos);
-                                    if (delMsg != null) {
-                                        long targetDialogId = did != 0 ? did : dialogId;
-                                        long fromId = delMsg.from_id != null ? DialogObject.getPeerDialogId(delMsg.from_id) : 0;
-                                        String text = delMsg.message;
-                                        String caption = (delMsg.media != null && delMsg.message != null) ? delMsg.message : null;
-                                        String mediaType = delMsg.media != null ? delMsg.media.getClass().getSimpleName() : null;
-                                        String mediaPath = delMsg.attachPath;
-                                        tw.nekomimi.nekogram.helpers.DeletedMessageStorage.getInstance().saveDeletedMessageAsync(
-                                            targetDialogId, mid, fromId, delMsg.date, (int) (System.currentTimeMillis() / 1000), text, caption, mediaType, mediaPath
-                                        );
-                                    }
-                                }
-                            } catch (Exception e) {
-                                FileLog.e(e);
-                            }
-                        }
-                        if (!DialogObject.isEncryptedDialog(did) && !deleteFiles && did != currentUser) {
-                            continue;
-                        }
                         NativeByteBuffer data = cursor.byteBufferValue(1);
                         if (data != null) {
                             TLRPC.Message message = TLRPC.Message.TLdeserialize(data, data.readInt32(false), false);
-                            message.readAttachPath(data, currentUser);
-                            if (deletedMessages != null) {
-                                deletedMessages.add(message);
-                            }
-                            data.reuse();
-                            if (DialogObject.isEncryptedDialog(did) || deleteFiles) {
-                                addFilesToDelete(message, filesToDelete, idsToDelete, namesToDelete, false);
-                            }
+                            if (message != null) {
+                                message.readAttachPath(data, currentUser);
+                                if (tw.nekomimi.nekogram.helpers.GhostModeController.shouldSaveDeletedMessages()) {
+                                    try {
+                                        long targetDialogId = did != 0 ? did : dialogId;
+                                        long fromId = message.from_id != null ? DialogObject.getPeerDialogId(message.from_id) : 0;
+                                        String text = message.message;
+                                        String caption = (message.media != null && message.message != null) ? message.message : null;
+                                        String mediaType = message.media != null ? message.media.getClass().getSimpleName() : null;
+                                        String mediaPath = message.attachPath;
+                                        int replyToMid = message.reply_to != null ? message.reply_to.reply_to_msg_id : 0;
+                                        int editDate = message.edit_date;
+                                        boolean isOut = MessageObject.isOut(message);
 
-                            if (did == currentUser) {
-                                long savedDialogId = MessageObject.getSavedDialogId(currentUser, message);
-                                if (savedDialogId != 0) {
-                                    ArrayList<Integer> mids2 = savedMessagesByDialogs.get(savedDialogId);
-                                    if (mids2 == null) {
-                                        mids2 = new ArrayList<>();
-                                        savedMessagesByDialogs.put(savedDialogId, mids2);
+                                        FileLog.d("[DeletedMessages] snapshot found=true dialogId=" + targetDialogId + " messageId=" + mid + " text=" + (text != null ? (text.length() > 20 ? text.substring(0, 20) + "..." : text) : "[null]"));
+
+                                        tw.nekomimi.nekogram.helpers.DeletedMessageStorage.getInstance().saveDeletedMessageSync(
+                                            targetDialogId, mid, fromId, message.date, (int) (System.currentTimeMillis() / 1000),
+                                            text, caption, mediaType, mediaPath, replyToMid, editDate, isOut
+                                        );
+                                    } catch (Exception e) {
+                                        FileLog.e("[DeletedMessages] snapshot save error: " + e.getMessage(), e);
                                     }
-                                    mids2.add(mid);
+                                }
+                                if (deletedMessages != null && (currentUser == dialogId || dialogId == 0)) {
+                                    deletedMessages.add(message);
+                                }
+                                if (DialogObject.isEncryptedDialog(did) || deleteFiles) {
+                                    addFilesToDelete(message, filesToDelete, idsToDelete, namesToDelete, false);
+                                }
+                                if (did == currentUser) {
+                                    long savedDialogId = MessageObject.getSavedDialogId(currentUser, message);
+                                    if (savedDialogId != 0) {
+                                        ArrayList<Integer> mids2 = savedMessagesByDialogs.get(savedDialogId);
+                                        if (mids2 == null) {
+                                            mids2 = new ArrayList<>();
+                                            savedMessagesByDialogs.put(savedDialogId, mids2);
+                                        }
+                                        mids2.add(mid);
+                                    }
                                 }
                             }
+                            data.reuse();
                         }
                     }
                 } catch (Exception e) {
@@ -14467,11 +14464,13 @@ public class MessagesStorage extends BaseController {
                         cursor.dispose();
                         cursor = null;
                     }
+                    FileLog.d("[DeletedMessages] original deletion started dialogId=" + did + " ids=" + ids);
                     database.executeFast(String.format(Locale.US, "DELETE FROM messages_v2 WHERE mid IN(%s) AND uid = %d", ids, did)).stepThis().dispose();
                     database.executeFast(String.format(Locale.US, "DELETE FROM messages_topics WHERE mid IN(%s) AND uid = %d", ids, did)).stepThis().dispose();
                     database.executeFast(String.format(Locale.US, "DELETE FROM polls_v2 WHERE mid IN(%s) AND uid = %d", ids, did)).stepThis().dispose();
                     database.executeFast(String.format(Locale.US, "DELETE FROM bot_keyboard WHERE mid IN(%s) AND uid = %d", ids, did)).stepThis().dispose();
                     database.executeFast(String.format(Locale.US, "DELETE FROM bot_keyboard_topics WHERE mid IN(%s) AND uid = %d", ids, did)).stepThis().dispose();
+                    FileLog.d("[DeletedMessages] original deletion completed dialogId=" + did);
                     if (unknownMessages.isEmpty()) {
                         cursor = database.queryFinalized(String.format(Locale.US, "SELECT uid, type FROM media_v4 WHERE mid IN(%s) AND uid = %d", ids, did));
                         SparseArray<LongSparseArray<Integer>> mediaCounts = null;
@@ -14938,38 +14937,37 @@ public class MessagesStorage extends BaseController {
                             }
                         }
                     }
-                    if (tw.nekomimi.nekogram.helpers.GhostModeController.shouldSaveDeletedMessages()) {
-                        try {
-                            NativeByteBuffer delData = cursor.byteBufferValue(1);
-                            if (delData != null) {
-                                int pos = delData.position();
-                                TLRPC.Message delMsg = TLRPC.Message.TLdeserialize(delData, delData.readInt32(false), false);
-                                delData.position(pos);
-                                if (delMsg != null) {
-                                    long targetDialogId = -channelId;
-                                    long fromId = delMsg.from_id != null ? DialogObject.getPeerDialogId(delMsg.from_id) : 0;
-                                    String text = delMsg.message;
-                                    String caption = (delMsg.media != null && delMsg.message != null) ? delMsg.message : null;
-                                    String mediaType = delMsg.media != null ? delMsg.media.getClass().getSimpleName() : null;
-                                    String mediaPath = delMsg.attachPath;
-                                    tw.nekomimi.nekogram.helpers.DeletedMessageStorage.getInstance().saveDeletedMessageAsync(
-                                        targetDialogId, delMsg.id, fromId, delMsg.date, (int) (System.currentTimeMillis() / 1000), text, caption, mediaType, mediaPath
-                                    );
-                                }
-                            }
-                        } catch (Exception e) {
-                            FileLog.e(e);
-                        }
-                    }
-                    if (!DialogObject.isEncryptedDialog(did) && !deleteFiles) {
-                        continue;
-                    }
                     NativeByteBuffer data = cursor.byteBufferValue(1);
                     if (data != null) {
                         TLRPC.Message message = TLRPC.Message.TLdeserialize(data, data.readInt32(false), false);
-                        message.readAttachPath(data, getUserConfig().clientUserId);
+                        if (message != null) {
+                            message.readAttachPath(data, getUserConfig().clientUserId);
+                            if (tw.nekomimi.nekogram.helpers.GhostModeController.shouldSaveDeletedMessages()) {
+                                try {
+                                    long targetDialogId = -channelId;
+                                    long fromId = message.from_id != null ? DialogObject.getPeerDialogId(message.from_id) : 0;
+                                    String text = message.message;
+                                    String caption = (message.media != null && message.message != null) ? message.message : null;
+                                    String mediaType = message.media != null ? message.media.getClass().getSimpleName() : null;
+                                    String mediaPath = message.attachPath;
+                                    int replyToMid = message.reply_to != null ? message.reply_to.reply_to_msg_id : 0;
+                                    int editDate = message.edit_date;
+                                    boolean isOut = MessageObject.isOut(message);
+
+                                    FileLog.d("[DeletedMessages] snapshot found=true dialogId=" + targetDialogId + " messageId=" + message.id);
+                                    tw.nekomimi.nekogram.helpers.DeletedMessageStorage.getInstance().saveDeletedMessageSync(
+                                        targetDialogId, message.id, fromId, message.date, (int) (System.currentTimeMillis() / 1000),
+                                        text, caption, mediaType, mediaPath, replyToMid, editDate, isOut
+                                    );
+                                } catch (Exception e) {
+                                    FileLog.e(e);
+                                }
+                            }
+                            if (DialogObject.isEncryptedDialog(did) || deleteFiles) {
+                                addFilesToDelete(message, filesToDelete, idsToDelete, namesToDelete, false);
+                            }
+                        }
                         data.reuse();
-                        addFilesToDelete(message, filesToDelete, idsToDelete, namesToDelete, false);
                     }
                 }
             } catch (Exception e) {
@@ -15033,11 +15031,13 @@ public class MessagesStorage extends BaseController {
                 cursor = null;
             }
 
+            FileLog.d("[DeletedMessages] channel clearHistory deletion started channelId=" + channelId + " maxMid=" + mid);
             database.executeFast(String.format(Locale.US, "DELETE FROM messages_v2 WHERE uid = %d AND mid <= %d", -channelId, mid)).stepThis().dispose();
             database.executeFast(String.format(Locale.US, "DELETE FROM messages_topics WHERE uid = %d AND mid <= %d", -channelId, mid)).stepThis().dispose();
             database.executeFast(String.format(Locale.US, "DELETE FROM media_v4 WHERE uid = %d AND mid <= %d", -channelId, mid)).stepThis().dispose();
             database.executeFast(String.format(Locale.US, "UPDATE media_counts_v2 SET old = 1 WHERE uid = %d", -channelId)).stepThis().dispose();
             database.executeFast(String.format(Locale.US, "UPDATE media_counts_topics SET old = 1 WHERE uid = %d", -channelId)).stepThis().dispose();
+            FileLog.d("[DeletedMessages] channel clearHistory deletion completed channelId=" + channelId);
             updateWidgets(dialogsIds);
             return dialogsIds;
         } catch (Exception e) {

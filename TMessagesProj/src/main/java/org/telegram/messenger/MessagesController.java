@@ -18808,6 +18808,7 @@ public class MessagesController extends BaseController implements NotificationCe
                 dialogs_read_outbox_max.put(dialogId, Math.max(value, update.max_id));
             } else if (baseUpdate instanceof TL_update.TL_updateDeleteMessages) {
                 TL_update.TL_updateDeleteMessages update = (TL_update.TL_updateDeleteMessages) baseUpdate;
+                FileLog.d("[DeletedMessages] delete event received dialogId=0 messageIds=" + update.messages);
                 if (deletedMessages == null) {
                     deletedMessages = new LongSparseArray<>();
                 }
@@ -19330,6 +19331,7 @@ public class MessagesController extends BaseController implements NotificationCe
                 dialogs_read_outbox_max.put(dialogId, Math.max(value, update.max_id));
             } else if (baseUpdate instanceof TL_update.TL_updateDeleteChannelMessages) {
                 TL_update.TL_updateDeleteChannelMessages update = (TL_update.TL_updateDeleteChannelMessages) baseUpdate;
+                FileLog.d("[DeletedMessages] delete event received dialogId=" + (-update.channel_id) + " messageIds=" + update.messages);
                 if (BuildVars.LOGS_ENABLED) {
                     FileLog.d(baseUpdate + " channelId = " + update.channel_id);
                 }
@@ -21095,12 +21097,22 @@ public class MessagesController extends BaseController implements NotificationCe
                     if (arrayList == null) {
                         continue;
                     }
-                    getNotificationCenter().postNotificationName(NotificationCenter.messagesDeleted, arrayList, -dialogId, false);
                     if (tw.nekomimi.nekogram.helpers.GhostModeController.shouldSaveDeletedMessages()) {
                         try {
                             for (int b = 0, size2 = arrayList.size(); b < size2; b++) {
                                 Integer id = arrayList.get(b);
                                 MessageObject obj = dialogMessagesByIds.get(id);
+                                if (obj == null && dialogId != 0) {
+                                    ArrayList<MessageObject> currentObjs = dialogMessage.get(dialogId);
+                                    if (currentObjs != null) {
+                                        for (int k = 0; k < currentObjs.size(); k++) {
+                                            if (currentObjs.get(k) != null && currentObjs.get(k).getId() == id) {
+                                                obj = currentObjs.get(k);
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
                                 if (obj != null && obj.messageOwner != null) {
                                     obj.deleted = true;
                                     long targetDialogId = dialogId != 0 ? dialogId : obj.getDialogId();
@@ -21109,15 +21121,23 @@ public class MessagesController extends BaseController implements NotificationCe
                                     String caption = obj.caption != null ? obj.caption.toString() : null;
                                     String mediaType = obj.messageOwner.media != null ? obj.messageOwner.media.getClass().getSimpleName() : null;
                                     String mediaPath = tw.nekomimi.nekogram.helpers.MessageHelper.getPathToMessage(obj);
-                                    tw.nekomimi.nekogram.helpers.DeletedMessageStorage.getInstance().saveDeletedMessageAsync(
-                                        targetDialogId, id, fromId, obj.messageOwner.date, (int) (System.currentTimeMillis() / 1000), text, caption, mediaType, mediaPath
+                                    int replyToMid = obj.getReplyMsgId();
+                                    int editDate = obj.messageOwner.edit_date;
+                                    boolean isOut = obj.isOut();
+                                    FileLog.d("[DeletedMessages] in-memory snapshot found dialogId=" + targetDialogId + " messageId=" + id);
+                                    tw.nekomimi.nekogram.helpers.DeletedMessageStorage.getInstance().saveDeletedMessageSync(
+                                        targetDialogId, id, fromId, obj.messageOwner.date, (int) (System.currentTimeMillis() / 1000),
+                                        text, caption, mediaType, mediaPath, replyToMid, editDate, isOut
                                     );
+                                } else {
+                                    FileLog.d("[DeletedMessages] in-memory message not found for id=" + id + " (dialogId=" + dialogId + "), falling back to MessagesStorage");
                                 }
                             }
                         } catch (Exception e) {
                             FileLog.e(e);
                         }
                     }
+                    getNotificationCenter().postNotificationName(NotificationCenter.messagesDeleted, arrayList, -dialogId, false);
                     if (dialogId == 0) {
                         for (int b = 0, size2 = arrayList.size(); b < size2; b++) {
                             Integer id = arrayList.get(b);
