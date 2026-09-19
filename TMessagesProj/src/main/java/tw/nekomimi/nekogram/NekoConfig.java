@@ -116,6 +116,7 @@ public class NekoConfig {
     public static boolean preferOriginalQuality = false;
     public static boolean quickForward = false;
     public static boolean reducedColors = false;
+    public static boolean deleted_messages_enabled = false;
     public static boolean shouldNOTTrustMe = false;
     public static boolean showAddToSavedMessages = true;
     public static boolean showCopyPhoto = false;
@@ -220,6 +221,7 @@ public class NekoConfig {
             preferOriginalQuality = preferences.getBoolean("preferOriginalQuality", false);
             quickForward = preferences.getBoolean("quickForward", false);
             reducedColors = preferences.getBoolean("reducedColors", false);
+            deleted_messages_enabled = preferences.getBoolean("deleted_messages_enabled", false) || preferences.getBoolean("ghost_save_deleted", false);
             shouldNOTTrustMe = preferences.getBoolean("shouldNOTTrustMe", false);
             showAddToSavedMessages = preferences.getBoolean("showAddToSavedMessages", true);
             showCopyPhoto = preferences.getBoolean("showCopyPhoto", false);

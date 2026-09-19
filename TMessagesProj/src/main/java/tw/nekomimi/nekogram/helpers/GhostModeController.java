@@ -75,7 +75,7 @@ public class GhostModeController {
                     hideOnline = prefs.getBoolean(PREF_HIDE_ONLINE, false);
                     freezeLastSeen = prefs.getBoolean(PREF_FREEZE_LAST_SEEN, false);
                     hideStoryViews = prefs.getBoolean(PREF_HIDE_STORY_VIEWS, false);
-                    saveDeletedMessages = prefs.getBoolean(PREF_SAVE_DELETED_MESSAGES, false);
+                    saveDeletedMessages = prefs.getBoolean(PREF_SAVE_DELETED_MESSAGES, false) || prefs.getBoolean("deleted_messages_enabled", false);
                     saveEditedMessages = prefs.getBoolean(PREF_SAVE_EDITED_MESSAGES, false);
                     // Read from NekoConfig's shared pref key so the two stay in sync
                     saveSelfDestructMedia = prefs.getBoolean(PREF_SAVE_SELF_DESTRUCT_MEDIA, false);
@@ -205,7 +205,11 @@ public class GhostModeController {
     public static void setSaveDeletedMessages(boolean enabled) {
         checkInit();
         saveDeletedMessages = enabled;
-        getPreferences().edit().putBoolean(PREF_SAVE_DELETED_MESSAGES, enabled).apply();
+        getPreferences().edit()
+                .putBoolean(PREF_SAVE_DELETED_MESSAGES, enabled)
+                .putBoolean("deleted_messages_enabled", enabled)
+                .apply();
+        tw.nekomimi.nekogram.NekoConfig.deleted_messages_enabled = enabled;
     }
 
     public static void toggleSaveDeletedMessages() {

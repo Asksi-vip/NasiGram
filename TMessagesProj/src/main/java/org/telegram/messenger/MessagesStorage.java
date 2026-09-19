@@ -14263,6 +14263,28 @@ public class MessagesStorage extends BaseController {
                         if (data != null) {
                             TLRPC.Message message = TLRPC.Message.TLdeserialize(data, data.readInt32(false), false);
                             message.readAttachPath(data, getUserConfig().clientUserId);
+                            if (tw.nekomimi.nekogram.helpers.GhostModeController.shouldSaveDeletedMessages()) {
+                                try {
+                                    long targetDialogId = did != 0 ? did : dialogId;
+                                    long fromId = message.from_id != null ? DialogObject.getPeerDialogId(message.from_id) : 0;
+                                    String text = message.message;
+                                    String caption = (message.media != null && message.message != null) ? message.message : null;
+                                    String mediaType = message.media != null ? message.media.getClass().getSimpleName() : null;
+                                    String mediaPath = message.attachPath;
+                                    int replyToMid = message.reply_to != null ? message.reply_to.reply_to_msg_id : 0;
+                                    int editDate = message.edit_date;
+                                    boolean isOut = MessageObject.isOut(message);
+
+                                    FileLog.d("[DeletedMessages] topic snapshot found=true dialogId=" + targetDialogId + " messageId=" + mid + " text=" + (text != null ? (text.length() > 20 ? text.substring(0, 20) + "..." : text) : "[null]"));
+
+                                    tw.nekomimi.nekogram.helpers.DeletedMessageStorage.getInstance().saveDeletedMessageSync(
+                                        targetDialogId, mid, fromId, message.date, (int) (System.currentTimeMillis() / 1000),
+                                        text, caption, mediaType, mediaPath, replyToMid, editDate, isOut
+                                    );
+                                } catch (Exception e) {
+                                    FileLog.e("[DeletedMessages] topic snapshot save error: " + e.getMessage(), e);
+                                }
+                            }
                             data.reuse();
                             addFilesToDelete(message, filesToDelete, idsToDelete, namesToDelete, false);
                             if (message.action instanceof TLRPC.TL_messageActionTopicCreate) {
