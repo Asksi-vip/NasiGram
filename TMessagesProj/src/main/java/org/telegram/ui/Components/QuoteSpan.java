@@ -70,6 +70,7 @@ public class QuoteSpan implements LeadingMarginSpan {
     public boolean isCollapsing;
     public boolean singleLine, first, last;
     public boolean rtl;
+    public boolean isGhostEdit;
 
     public final QuoteStyleSpan styleSpan;
     public QuoteCollapsedPart collapsedSpan;

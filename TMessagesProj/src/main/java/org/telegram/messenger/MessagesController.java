@@ -19426,16 +19426,29 @@ public class MessagesController extends BaseController implements NotificationCe
                 if (tw.nekomimi.nekogram.helpers.GhostModeController.shouldSaveEditedMessages()) {
                     try {
                         long editDialogId = MessageObject.getDialogId(message);
+                        String oldText = null;
+                        int oldDate = 0;
+                        String mediaType = null;
+                        String caption = null;
+
                         MessageObject existingObj = dialogMessagesByIds.get(message.id);
                         if (existingObj != null && existingObj.messageOwner != null) {
-                            String oldText = existingObj.messageOwner.message;
-                            String newText = message.message;
-                            if (oldText != null && !oldText.equals(newText)) {
-                                String mediaType = existingObj.messageOwner.media != null ? existingObj.messageOwner.media.getClass().getSimpleName() : null;
-                                String caption = existingObj.caption != null ? existingObj.caption.toString() : null;
-                                int oldDate = existingObj.messageOwner.edit_date != 0 ? existingObj.messageOwner.edit_date : existingObj.messageOwner.date;
-                                tw.nekomimi.nekogram.helpers.EditedMessageStorage.getInstance().saveEditAsync(editDialogId, message.id, oldText, oldDate, mediaType, caption);
+                            oldText = existingObj.messageOwner.message;
+                            oldDate = existingObj.messageOwner.edit_date != 0 ? existingObj.messageOwner.edit_date : existingObj.messageOwner.date;
+                            mediaType = existingObj.messageOwner.media != null ? existingObj.messageOwner.media.getClass().getSimpleName() : null;
+                            caption = existingObj.caption != null ? existingObj.caption.toString() : null;
+                        } else {
+                            TLRPC.Message dbMsg = getMessagesStorage().getMessage(editDialogId, message.id);
+                            if (dbMsg != null) {
+                                oldText = dbMsg.message;
+                                oldDate = dbMsg.edit_date != 0 ? dbMsg.edit_date : dbMsg.date;
+                                mediaType = dbMsg.media != null ? dbMsg.media.getClass().getSimpleName() : null;
+                                caption = dbMsg.media != null ? dbMsg.message : null;
                             }
+                        }
+                        String newText = message.message;
+                        if (oldText != null && !oldText.equals(newText)) {
+                            tw.nekomimi.nekogram.helpers.EditedMessageStorage.getInstance().saveEditSync(editDialogId, message.id, oldText, oldDate, mediaType, caption);
                         }
                     } catch (Exception e) {
                         FileLog.e(e);
@@ -21221,9 +21234,7 @@ public class MessagesController extends BaseController implements NotificationCe
             for (int a = 0, size = deletedMessages.size(); a < size; a++) {
                 long key = deletedMessages.keyAt(a);
                 ArrayList<Integer> arrayList = deletedMessages.valueAt(a);
-                if (tw.nekomimi.nekogram.helpers.GhostModeController.shouldSaveDeletedMessages()) {
-                    continue;
-                }
+
                 getMessagesStorage().getStorageQueue().postRunnable(() -> {
                     ArrayList<Long> dialogIds = getMessagesStorage().markMessagesAsDeleted(key, arrayList, false, true, 0, 0);
                     getMessagesStorage().updateDialogsWithDeletedMessages(key, -key, arrayList, dialogIds);

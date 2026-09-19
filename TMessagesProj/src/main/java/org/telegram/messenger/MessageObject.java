@@ -228,6 +228,8 @@ public class MessageObject {
     public int dateKeyInt;
     public String monthKey;
     public boolean deleted;
+    public boolean isGhostEdited;
+    public boolean ghostEditQuoteAttached;
     public boolean deletedByThanos;
     public float audioProgress;
     public float forceSeekTo = -1;
@@ -1007,6 +1009,7 @@ public class MessageObject {
         public boolean code;
         public boolean quote;
         public boolean quoteCollapse;
+        public boolean isGhostEdit;
 
         public String language;
         public Text languageLayout;
@@ -8667,6 +8670,40 @@ public class MessageObject {
         if (type != TYPE_TEXT && type != TYPE_EMOJIS && type != TYPE_STORY_MENTION || messageOwner.peer_id == null || TextUtils.isEmpty(messageText) && !isBotPendingDraft) {
             return;
         }
+        if (tw.nekomimi.nekogram.helpers.GhostModeController.shouldSaveEditedMessages() && !ghostEditQuoteAttached && messageOwner != null && messageOwner.edit_date != 0) {
+            java.util.ArrayList<tw.nekomimi.nekogram.helpers.EditedMessageStorage.EditRecord> edits = tw.nekomimi.nekogram.helpers.EditedMessageStorage.getInstance().getEditHistorySync(getDialogId(), getId());
+            if (edits != null && !edits.isEmpty()) {
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < edits.size(); i++) {
+                    tw.nekomimi.nekogram.helpers.EditedMessageStorage.EditRecord r = edits.get(i);
+                    String t = !android.text.TextUtils.isEmpty(r.text) ? r.text : r.caption;
+                    if (!android.text.TextUtils.isEmpty(t)) {
+                        if (sb.length() > 0) sb.append("\n");
+                        sb.append(t);
+                    }
+                }
+                String oldContent = sb.toString();
+                if (!android.text.TextUtils.isEmpty(oldContent) && !oldContent.equals(messageText != null ? messageText.toString() : "")) {
+                    ghostEditQuoteAttached = true;
+                    isGhostEdited = true;
+                    android.text.SpannableStringBuilder ssb = new android.text.SpannableStringBuilder();
+                    int start = 0;
+                    ssb.append(oldContent);
+                    int end = ssb.length();
+                    org.telegram.ui.Components.QuoteSpan.putQuote(ssb, start, end, false);
+                    org.telegram.ui.Components.QuoteSpan[] qSpans = ssb.getSpans(start, end, org.telegram.ui.Components.QuoteSpan.class);
+                    for (org.telegram.ui.Components.QuoteSpan qs : qSpans) {
+                        qs.setColor(0xFFE53935);
+                        qs.isGhostEdit = true;
+                    }
+                    ssb.append("\n");
+                    if (messageText != null) {
+                        ssb.append(messageText);
+                    }
+                    messageText = ssb;
+                }
+            }
+        }
         boolean hasUrls = applyEntities();
         boolean noforwards = messageOwner != null && messageOwner.noforwards;
         if (!noforwards) {
@@ -8839,6 +8876,7 @@ public class MessageObject {
             block.code = range.code;
             block.quote = range.quote;
             block.quoteCollapse = range.collapse;
+            block.isGhostEdit = range.isGhostEdit;
             if (block.quoteCollapse) {
                 block.messageObject = this;
             }
@@ -12782,6 +12820,7 @@ public class MessageObject {
         public boolean quote;
         public boolean code;
         public boolean collapse;
+        public boolean isGhostEdit;
         public String language;
 
         public TextRange(int start, int end) {
@@ -12812,6 +12851,7 @@ public class MessageObject {
         final int CODE_START = 4;
         final int CODE_END = 8;
         final int QUOTE_START_COLLAPSE = 16;
+        final int QUOTE_START_GHOST = 32;
 
         final TreeSet<Integer> cutIndexes = new TreeSet<>();
         final HashMap<Integer, Integer> cutToType = new HashMap<>();
@@ -12825,7 +12865,9 @@ public class MessageObject {
             int end = spanned.getSpanEnd(quoteSpans[i]);
 
             cutIndexes.add(start);
-            cutToType.put(start, (cutToType.containsKey(start) ? cutToType.get(start) : 0) | (quoteSpans[i].span.isCollapsing ? QUOTE_START_COLLAPSE : QUOTE_START));
+            int flags = (quoteSpans[i].span.isCollapsing ? QUOTE_START_COLLAPSE : QUOTE_START);
+            if (quoteSpans[i].span.isGhostEdit) flags |= QUOTE_START_GHOST;
+            cutToType.put(start, (cutToType.containsKey(start) ? cutToType.get(start) : 0) | flags);
 
             cutIndexes.add(end);
             cutToType.put(end, (cutToType.containsKey(end) ? cutToType.get(end) : 0) | QUOTE_END);
@@ -12861,6 +12903,7 @@ public class MessageObject {
 
         int from = 0;
         boolean quoteCollapse = false;
+        boolean quoteGhost = false;
         int quoteCount = 0, codeCount = 0;
         for (Iterator<Integer> i = cutIndexes.iterator(); i.hasNext(); ) {
             int cutIndex = i.next();
@@ -12877,23 +12920,31 @@ public class MessageObject {
                     codeSpanIndex++;
                 }
 
-                ranges.add(new TextRange(from, cutIndex, quoteCount > 0, codeCount > 0, quoteCollapse, lng));
+                TextRange tr = new TextRange(from, cutIndex, quoteCount > 0, codeCount > 0, quoteCollapse, lng);
+                tr.isGhostEdit = quoteGhost;
+                ranges.add(tr);
                 from = cutIndex;
                 if (from + 1 < text.length() && text.charAt(from) == '\n') {
                     from++;
                 }
             }
 
-            if ((type & QUOTE_END) != 0) quoteCount--;
+            if ((type & QUOTE_END) != 0) {
+                quoteCount--;
+                quoteGhost = false;
+            }
             if ((type & QUOTE_START) != 0 || (type & QUOTE_START_COLLAPSE) != 0) {
                 quoteCount++;
                 quoteCollapse = (type & QUOTE_START_COLLAPSE) != 0;
+                quoteGhost = (type & QUOTE_START_GHOST) != 0;
             }
             if ((type & CODE_END) != 0) codeCount--;
             if ((type & CODE_START) != 0) codeCount++;
         }
         if (from < text.length()) {
-            ranges.add(new TextRange(from, text.length(), quoteCount > 0, codeCount > 0, quoteCollapse, null));
+            TextRange tr = new TextRange(from, text.length(), quoteCount > 0, codeCount > 0, quoteCollapse, null);
+            tr.isGhostEdit = quoteGhost;
+            ranges.add(tr);
         }
     }
 

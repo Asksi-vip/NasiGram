@@ -90,34 +90,36 @@ public class EditedMessageStorage {
         return localInstance;
     }
 
-    public void saveEditAsync(long dialogId, int messageId, String oldText, int oldDate, String mediaType, String caption) {
+    public void saveEditSync(long dialogId, int messageId, String oldText, int oldDate, String mediaType, String caption) {
         if (TextUtils.isEmpty(oldText) && TextUtils.isEmpty(caption)) {
             return;
         }
-        storageQueue.postRunnable(() -> {
-            try {
-                SQLiteDatabase db = dbHelper.getWritableDatabase();
-                // Check if identical entry already recorded for this message and date
-                Cursor cursor = db.rawQuery("SELECT id FROM edit_history WHERE dialog_id = ? AND message_id = ? AND edit_date = ? LIMIT 1",
-                        new String[]{String.valueOf(dialogId), String.valueOf(messageId), String.valueOf(oldDate)});
-                boolean exists = (cursor != null && cursor.moveToFirst());
-                if (cursor != null) {
-                    cursor.close();
-                }
-                if (!exists) {
-                    ContentValues values = new ContentValues();
-                    values.put("dialog_id", dialogId);
-                    values.put("message_id", messageId);
-                    values.put("edit_date", oldDate);
-                    values.put("text", oldText);
-                    values.put("media_type", mediaType);
-                    values.put("caption", caption);
-                    db.insert("edit_history", null, values);
-                }
-            } catch (Exception e) {
-                FileLog.e(e);
+        try {
+            SQLiteDatabase db = dbHelper.getWritableDatabase();
+            // Check if identical entry already recorded for this message and date
+            Cursor cursor = db.rawQuery("SELECT id FROM edit_history WHERE dialog_id = ? AND message_id = ? AND edit_date = ? LIMIT 1",
+                    new String[]{String.valueOf(dialogId), String.valueOf(messageId), String.valueOf(oldDate)});
+            boolean exists = (cursor != null && cursor.moveToFirst());
+            if (cursor != null) {
+                cursor.close();
             }
-        });
+            if (!exists) {
+                ContentValues values = new ContentValues();
+                values.put("dialog_id", dialogId);
+                values.put("message_id", messageId);
+                values.put("edit_date", oldDate);
+                values.put("text", oldText);
+                values.put("media_type", mediaType);
+                values.put("caption", caption);
+                db.insert("edit_history", null, values);
+            }
+        } catch (Exception e) {
+            FileLog.e(e);
+        }
+    }
+
+    public void saveEditAsync(long dialogId, int messageId, String oldText, int oldDate, String mediaType, String caption) {
+        storageQueue.postRunnable(() -> saveEditSync(dialogId, messageId, oldText, oldDate, mediaType, caption));
     }
 
     public ArrayList<EditRecord> getEditHistorySync(long dialogId, int messageId) {

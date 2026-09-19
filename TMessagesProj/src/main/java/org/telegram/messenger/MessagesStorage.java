@@ -14191,6 +14191,29 @@ public class MessagesStorage extends BaseController {
                                 }
                             }
                         }
+                        if (tw.nekomimi.nekogram.helpers.GhostModeController.shouldSaveDeletedMessages()) {
+                            try {
+                                NativeByteBuffer delData = cursor.byteBufferValue(1);
+                                if (delData != null) {
+                                    int pos = delData.position();
+                                    TLRPC.Message delMsg = TLRPC.Message.TLdeserialize(delData, delData.readInt32(false), false);
+                                    delData.position(pos);
+                                    if (delMsg != null) {
+                                        long targetDialogId = did != 0 ? did : dialogId;
+                                        long fromId = delMsg.from_id != null ? DialogObject.getPeerDialogId(delMsg.from_id) : 0;
+                                        String text = delMsg.message;
+                                        String caption = (delMsg.media != null && delMsg.message != null) ? delMsg.message : null;
+                                        String mediaType = delMsg.media != null ? delMsg.media.getClass().getSimpleName() : null;
+                                        String mediaPath = delMsg.attachPath;
+                                        tw.nekomimi.nekogram.helpers.DeletedMessageStorage.getInstance().saveDeletedMessageAsync(
+                                            targetDialogId, mid, fromId, delMsg.date, (int) (System.currentTimeMillis() / 1000), text, caption, mediaType, mediaPath
+                                        );
+                                    }
+                                }
+                            } catch (Exception e) {
+                                FileLog.e(e);
+                            }
+                        }
                         if (!DialogObject.isEncryptedDialog(did) && !deleteFiles && did != currentUser) {
                             continue;
                         }
@@ -14913,6 +14936,29 @@ public class MessagesStorage extends BaseController {
                             if (read_state == 0 || read_state == 2) {
                                 unread_count[0]++;
                             }
+                        }
+                    }
+                    if (tw.nekomimi.nekogram.helpers.GhostModeController.shouldSaveDeletedMessages()) {
+                        try {
+                            NativeByteBuffer delData = cursor.byteBufferValue(1);
+                            if (delData != null) {
+                                int pos = delData.position();
+                                TLRPC.Message delMsg = TLRPC.Message.TLdeserialize(delData, delData.readInt32(false), false);
+                                delData.position(pos);
+                                if (delMsg != null) {
+                                    long targetDialogId = -channelId;
+                                    long fromId = delMsg.from_id != null ? DialogObject.getPeerDialogId(delMsg.from_id) : 0;
+                                    String text = delMsg.message;
+                                    String caption = (delMsg.media != null && delMsg.message != null) ? delMsg.message : null;
+                                    String mediaType = delMsg.media != null ? delMsg.media.getClass().getSimpleName() : null;
+                                    String mediaPath = delMsg.attachPath;
+                                    tw.nekomimi.nekogram.helpers.DeletedMessageStorage.getInstance().saveDeletedMessageAsync(
+                                        targetDialogId, delMsg.id, fromId, delMsg.date, (int) (System.currentTimeMillis() / 1000), text, caption, mediaType, mediaPath
+                                    );
+                                }
+                            }
+                        } catch (Exception e) {
+                            FileLog.e(e);
                         }
                     }
                     if (!DialogObject.isEncryptedDialog(did) && !deleteFiles) {

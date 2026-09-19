@@ -118,6 +118,15 @@ public class ReplyMessageLine {
         this.backgroundColor = backgroundColor;
     }
 
+    public void setCustomColor(int color) {
+        color1 = color2 = color3 = color;
+        backgroundColor = androidx.core.graphics.ColorUtils.setAlphaComponent(color, 0x1e);
+        color1Animated.set(color, true);
+        color2Animated.set(color, true);
+        color3Animated.set(color, true);
+        backgroundColorAnimated.set(backgroundColor, true);
+    }
+
     private int wasMessageId;
     private int wasColorId;
     private long wasCollectionId;

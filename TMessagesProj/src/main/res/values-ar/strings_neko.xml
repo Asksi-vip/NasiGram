@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="NekoSettings">Ø¥Ø¹Ø¯Ø§Ø¯Ø§Øª NasiGram</string>
-    <string name="GhostMode">ðŸ‘» ÙˆØ¶Ø¹ Ø§Ù„Ø´Ø¨Ø­ (Ghost Mode)</string>
-    <string name="GhostModeAbout">ØªØ­ÙƒÙ… Ø¨Ø¸Ù‡ÙˆØ± Ù†Ø´Ø§Ø·Ùƒ Ù„Ù„Ø¢Ø®Ø±ÙŠÙ†.</string>
-    <string name="GhostHideRead">Ø¥Ø®ÙØ§Ø¡ Ø­Ø§Ù„Ø© Ø§Ù„Ù‚Ø±Ø§Ø¡Ø©</string>
-    <string name="GhostHideReadAbout">Ø¹Ø¯Ù… Ø¥Ø±Ø³Ø§Ù„ Ø¥Ø´Ø¹Ø§Ø± Ù‚Ø±Ø§Ø¡Ø© Ø§Ù„Ø±Ø³Ø§Ø¦Ù„ Ø¹Ù†Ø¯ ÙØªØ­ Ø§Ù„Ù…Ø­Ø§Ø¯Ø«Ø©.</string>
-    <string name="GhostHideTyping">Ø¥Ø®ÙØ§Ø¡ Ø­Ø§Ù„Ø© Ø§Ù„ÙƒØªØ§Ø¨Ø©</string>
-    <string name="GhostHideTypingAbout">Ù…Ù†Ø¹ Ø¥Ø±Ø³Ø§Ù„ Ø­Ø§Ù„Ø© \'ÙŠÙƒØªØ¨ Ø§Ù„Ø¢Ù†...\' Ø£Ø«Ù†Ø§Ø¡ ÙƒØªØ§Ø¨Ø© Ø§Ù„Ø±Ø³Ø§Ø¦Ù„.</string>
-    <string name="GhostHideRecording">Ø¥Ø®Ù Ø§Ø¡ Ø­Ø§Ù„Ø© Ø§Ù„ØªØ³Ø¬ÙŠÙ„</string>
-    <string name="GhostHideRecordingAbout">Ù…Ù†Ø¹ Ø¥Ø±Ø³Ø§Ù„ Ø­Ø§Ù„Ø© ØªØ³Ø¬ÙŠÙ„ Ø§Ù„ØµÙˆØª Ø£Ùˆ Ø§Ù„Ù ÙŠØ¯ÙŠÙˆ.</string>
-    <string name="GhostHideOnline">Ø¥Ø®Ù Ø§Ø¡ Online</string>
-    <string name="GhostHideOnlineAbout">Ù…Ù†Ø¹ Ø¥Ø±Ø³Ø§Ù„ Ø¥Ø´Ø¹Ø§Ø± Ø§Ù„ØªÙˆØ§Ø¬Ø¯ Ù…ØªØµÙ„Ø§Ù‹ Ø¹Ù†Ø¯ Ø§Ø³ØªØ®Ø¯Ø§Ù… Ø§Ù„ØªØ·Ø¨ÙŠÙ‚.</string>
-    <string name="GhostFreezeLastSeen">ØªØ¬Ù…ÙŠØ¯ Ø¢Ø®Ø± Ø¸Ù‡ÙˆØ±</string>
-    <string name="GhostFreezeLastSeenAbout">Ø¹Ø¯Ù… ØªØ­Ø¯ÙŠØ« ÙˆÙ‚Øª Ø¢Ø®Ø± Ø¸Ù‡ÙˆØ± Ø¹Ù†Ø¯ Ø§Ø³ØªØ®Ø¯Ø§Ù… Ø§Ù„ØªØ·Ø¨ÙŠÙ‚.</string>
-    <string name="GhostHideStoryViews">Ø¥Ø®Ù Ø§Ø¡ Ù…Ø´Ø§Ù‡Ø¯Ø© Ø§Ù„Ù‚ØµØµ</string>
-    <string name="GhostHideStoryViewsAbout">Ù…Ø´Ø§Ù‡Ø¯Ø© Ø§Ù„Ù‚ØµØµ Ø¯ÙˆÙ† Ø¥Ø±Ø³Ø§Ù„ ØªØ£ÙƒÙŠØ¯ Ø§Ù„Ù…Ø´Ø§Ù‡Ø¯Ø© Ù„ØµØ§Ø­Ø¨ Ø§Ù„Ù‚ØµØ©.</string>
+    <string name="NekoSettings">إعدادات NasiGram</string>
+    <string name="GhostMode">👻 وضع الشبح (Ghost Mode)</string>
+    <string name="GhostModeAbout">تحكم بظهور نشاطك للآخرين.</string>
+    <string name="GhostHideRead">إخفاء حالة القراءة</string>
+    <string name="GhostHideReadAbout">عدم إرسال إشعار قراءة الرسائل عند فتح المحادثة.</string>
+    <string name="GhostHideTyping">إخفاء حالة الكتابة</string>
+    <string name="GhostHideTypingAbout">منع إرسال حالة \'يكتب الآن...\' أثناء كتابة الرسائل.</string>
+    <string name="GhostHideRecording">إخفاء حالة التسجيل</string>
+    <string name="GhostHideRecordingAbout">منع إرسال حالة تسجيل الصوت أو الفيديو.</string>
+    <string name="GhostHideOnline">إخفاء متصل (Online)</string>
+    <string name="GhostHideOnlineAbout">منع إرسال إشعار التواجد متصلاً عند استخدام التطبيق.</string>
+    <string name="GhostFreezeLastSeen">تجميد آخر ظهور</string>
+    <string name="GhostFreezeLastSeenAbout">عدم تحديث وقت آخر ظهور عند استخدام التطبيق.</string>
+    <string name="GhostHideStoryViews">إخفاء مشاهدة القصص</string>
+    <string name="GhostHideStoryViewsAbout">مشاهدة القصص دون إرسال تأكيد المشاهدة لصاحب القصة.</string>
     <string name="GhostSaveDeleted">💾 حفظ الرسائل المحذوفة</string>
     <string name="GhostSaveDeletedAbout">احتفظ بنسخة محلية من الرسائل التي تصلك قبل أن يُحذفها المرسل.</string>
     <string name="GhostSaveEdited">✏️ حفظ الرسائل المعدّلة</string>

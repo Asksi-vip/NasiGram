@@ -16924,6 +16924,9 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                         quoteLine = new ReplyMessageLine(this);
                     }
                     quoteLine.check(currentMessageObject, currentUser, currentChat, resourcesProvider, ReplyMessageLine.TYPE_QUOTE);
+                    if (block.isGhostEdit) {
+                        quoteLine.setCustomColor(0xFFE53935);
+                    }
 
                     AndroidUtilities.rectTmp.set(0, -block.padTop + dp(block.first ? 3 + 1.66f : 3), width, block.height(transitionParams) + dp(4));
                     AndroidUtilities.rectTmp.offset(blockRtl, 0);
