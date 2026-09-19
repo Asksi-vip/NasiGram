@@ -34,26 +34,15 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Fast Build ARM64 APK with Gradle
-        run: ./gradlew assembleDebug -PabiList=arm64-v8a --parallel --build-cache --stacktrace
+      - name: Build ARM64 & ARMv7 APKs with Gradle
+        run: ./gradlew assembleDebug -PabiList=arm64-v8a,armeabi-v7a --parallel --build-cache --stacktrace
 
-      - name: Find APK file
-        id: find-apk
-        run: |
-          APK=$(find TMessagesProj_App/build/outputs/apk -name "*.apk" | head -1)
-          if [ -z "$APK" ]; then
-            echo "ERROR: No APK found"
-            exit 1
-          fi
-          echo "apk_path=$APK" >> "$GITHUB_OUTPUT"
-          echo "Found APK: $APK"
-
-      - name: Upload APK as Release
+      - name: Upload APKs as Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: build-${{ github.run_number }}
           name: Build ${{ github.run_number }}
-          files: ${{ steps.find-apk.outputs.apk_path }}
+          files: TMessagesProj_App/build/outputs/apk/debug/*.apk
           prerelease: true
           generate_release_notes: false
         env:

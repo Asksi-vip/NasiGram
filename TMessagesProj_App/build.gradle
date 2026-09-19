@@ -112,7 +112,7 @@ androidComponents {
             def abi = output.filters.find { it.filterType == FilterConfiguration.FilterType.ABI }?.identifier
             def abiName = abi ?: "universal"
             def baseVersionCode = output.versionCode.get()
-            output.outputFileName.set("NasiGram---.apk")
+            output.outputFileName.set("NasiGram-${abiName}.apk")
             output.versionCode.set(baseVersionCode * 10)
         }
     }
